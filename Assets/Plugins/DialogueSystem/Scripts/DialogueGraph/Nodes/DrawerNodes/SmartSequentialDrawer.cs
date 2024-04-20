@@ -14,6 +14,14 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.DrawerNodes
         private float _timeLimit;
         private float _time;
         private int _index;
+        public override AbstractNode Clone()
+        {
+            var node = Instantiate(this);
+            node.narrator = narrator;
+            node.symbolTime = symbolTime;
+            node.defaultSymbolTime = defaultSymbolTime;
+            return node;
+        }
         
         public override void OnDrawStart(Dialogue dialogue, Storyline storyline)
         {

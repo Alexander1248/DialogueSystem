@@ -6,11 +6,11 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Attributes
     [AttributeUsage(AttributeTargets.Class)]
     public class OutputPort : Attribute
     {
-        public readonly int color;
+        public readonly Type type;
         public readonly string name;
-        public OutputPort(int color, string name = null)
+        public OutputPort(Type type, string name = null)
         {
-            this.color = color;
+            this.type = type;
             this.name = name;
         }
     }

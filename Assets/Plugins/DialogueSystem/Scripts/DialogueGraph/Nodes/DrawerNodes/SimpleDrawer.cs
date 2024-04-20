@@ -7,6 +7,12 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.DrawerNodes
         [SerializeField] private string narrator;
 
         private Narrator _narrator;
+        public override AbstractNode Clone()
+        {
+            var node = Instantiate(this);
+            node.narrator = narrator;
+            return node;
+        }
         
         public override void OnDrawStart(Dialogue dialogue, Storyline storyline)
         {

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Plugins.DialogueSystem.Scripts.DialogueGraph.Attributes;
 using Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes;
 using Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.StorylineNodes;
 using Unity.VisualScripting;
@@ -15,6 +16,7 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph
 
         public static Storyline Clone(Storyline node)
         {
+            // TODO: Clone graph
             var clones = new Dictionary<AbstractNode, AbstractNode>();
             var completed = new List<AbstractNode>();
             var queue = new Queue<AbstractNode>();
@@ -37,15 +39,17 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph
                         if (dialogueNode.drawer != null)
                             queue.Enqueue(dialogueNode.drawer);
                         
-                        if (dialogueNode.branchChoiser != null)
-                            queue.Enqueue(dialogueNode.branchChoiser);
+                        if (dialogueNode.branchChoicer != null)
+                            queue.Enqueue(dialogueNode.branchChoicer);
                         break;
-                    case Drawer drawer:
-                        if (drawer.container != null)
-                            queue.Enqueue(drawer.container);
-                        break;
-                    case Property:
-                    case BranchChoiser:
+                    default:
+                        foreach (var field in n.GetType().GetFields())
+                        {
+                            if (!field.HasAttribute(typeof(InputPort))) continue;
+                            if (field.GetValue(n) is AbstractNode abstractNode)
+                                queue.Enqueue(abstractNode);
+                        }
+                        
                         break;
                 }
             }
@@ -59,12 +63,15 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph
                 completed.Add(n);
 
                 var clone = clones[n];
+                if (clone == null) continue;
                 if (n is not Storyline storyline)
                 {
-                    if (n is not Drawer drawer) continue;
-                    var drawerClone = clone as Drawer;
-                    drawerClone!.container = drawer.container == null ? null : clones[drawer.container] as TextContainer;
-                    
+                    foreach (var field in n.GetType().GetFields())
+                    {
+                        if (!field.HasAttribute(typeof(InputPort))) continue;
+                        var value = field.GetValue(n) as AbstractNode;
+                        field.SetValue(clone, value == null ? null : clones[value]);
+                    }
                     continue;
                 }
 
@@ -80,7 +87,7 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph
                     storylineClone!.properties.Add(clones[property] as Property);
 
                 storylineClone!.drawer = storyline.drawer == null ? null : clones[storyline.drawer] as Drawer;
-                storylineClone!.branchChoiser = storyline.branchChoiser == null ? null : clones[storyline.branchChoiser] as BranchChoiser;
+                storylineClone!.branchChoicer = storyline.branchChoicer == null ? null : clones[storyline.branchChoicer] as BranchChoicer;
             }
 
             return clones[node] as Storyline;

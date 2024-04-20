@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Plugins.DialogueSystem.Scripts.DialogueGraph.Attributes;
 using Plugins.DialogueSystem.Scripts.Utils;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -8,10 +9,15 @@ using UnityEngine.UIElements;
 
 namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes
 {
+    [OutputPort(typeof(Storyline),"Storyline")]
     public class Storyline : AbstractNode
     {
+        static Storyline()
+        {
+            NodeColors.Colors.Add(typeof(Storyline), new Color(0, 0.5f, 0));
+        }
         [HideInInspector] public UDictionary<int, Storyline> next = new();
-        [HideInInspector] public BranchChoiser branchChoiser;
+        [FormerlySerializedAs("branchChoiser")] [HideInInspector] public BranchChoicer branchChoicer;
         [FormerlySerializedAs("contextHandler")] [HideInInspector] public Drawer drawer;
         [HideInInspector] public List<Property> properties = new();
         public string tag;
@@ -25,13 +31,13 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes
 
         public virtual Storyline GetNext() 
         {
-            if (branchChoiser.IsUnityNull()) return next[0];
-            if (branchChoiser.SelectionIndex < 0 || branchChoiser.SelectionIndex >= next.Count)
+            if (branchChoicer.IsUnityNull()) return next[0];
+            if (branchChoicer.SelectionIndex < 0 || branchChoicer.SelectionIndex >= next.Count)
             {
                 Debug.LogError("BranchChoisers selection index out of bounds!");
                 return null;
             }
-            return next[branchChoiser.SelectionIndex];
+            return next[branchChoicer.SelectionIndex];
         }
 
 
@@ -42,8 +48,8 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes
             if (!drawer.IsUnityNull())
                 drawer.OnDrawStart(dialogue, this);
             
-            if (!branchChoiser.IsUnityNull())
-                branchChoiser.OnDrawStart(dialogue, this);
+            if (!branchChoicer.IsUnityNull())
+                branchChoicer.OnDrawStart(dialogue, this);
         }
 
         public virtual void OnDrawEnd(Dialogue dialogue)
@@ -53,8 +59,8 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes
             if (!drawer.IsUnityNull())
                 drawer.OnDrawEnd(dialogue, this);
             
-            if (!branchChoiser.IsUnityNull())
-                branchChoiser.OnDrawEnd(dialogue, this);
+            if (!branchChoicer.IsUnityNull())
+                branchChoicer.OnDrawEnd(dialogue, this);
         } 
         public virtual void OnDelayStart(Dialogue dialogue)
         {
@@ -64,8 +70,8 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes
             if (!drawer.IsUnityNull())
                 drawer.OnDelayStart(dialogue, this);
             
-            if (!branchChoiser.IsUnityNull())
-                branchChoiser.OnDelayStart(dialogue, this);
+            if (!branchChoicer.IsUnityNull())
+                branchChoicer.OnDelayStart(dialogue, this);
         } 
         public virtual void OnDelayEnd(Dialogue dialogue)
         {
@@ -75,8 +81,8 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes
             if (!drawer.IsUnityNull())
                 drawer.OnDelayEnd(dialogue, this);
             
-            if (!branchChoiser.IsUnityNull())
-                branchChoiser.OnDelayEnd(dialogue, this);
+            if (!branchChoicer.IsUnityNull())
+                branchChoicer.OnDelayEnd(dialogue, this);
         } 
         public override void BuildContextualMenu(ContextualMenuPopulateEvent evt, Action onGraphViewUpdate)
         {

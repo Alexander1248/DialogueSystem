@@ -10,7 +10,15 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.DrawerNodes
         private Narrator _narrator;
         private string _currentText;
         private float _time;
-        
+
+        public override AbstractNode Clone()
+        {
+            var node = Instantiate(this);
+            node.narrator = narrator;
+            node.time = time;
+            return node;
+        }
+
         public override void OnDrawStart(Dialogue dialogue, Storyline storyline)
         {
             _narrator = dialogue.GetNarrator(narrator);

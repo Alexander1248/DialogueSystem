@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Plugins.DialogueSystem.Scripts;
+using Plugins.DialogueSystem.Scripts.DialogueGraph;
 using Plugins.DialogueSystem.Scripts.DialogueGraph.Attributes;
 using Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes;
 using Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.StorylineNodes;
-using Plugins.DialogueSystem.Scripts.Utils;
 using Unity.VisualScripting;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
@@ -17,13 +15,6 @@ namespace Plugins.DialogueSystem.Editor.DialogueGraph
 {
     public class NodeView : Node
     {
-        public static readonly Color DialogueColor = new(0, 0.5f, 0);
-        public static readonly Color PropertyColor = new(1, 1, 1);
-        public static readonly Color ChoiserColor = new(0.3f, 0.5f, 1f);
-        public static readonly Color DrawerColor = new(0.8f, 0.4f, 0);
-        public static readonly Color ContentColor = new(0.75f, 0, 0);
-        public static readonly Color ValueColor = new(1f, 1f, 0);
-        
         public Action<NodeView> onNodeSelected;
         public Action onGraphViewUpdate;
         
@@ -54,56 +45,26 @@ namespace Plugins.DialogueSystem.Editor.DialogueGraph
 
                     Inputs[0] = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Single,
                         typeof(Drawer));
-                    Inputs[0].portColor = DrawerColor;
+                    Inputs[0].portColor = GetColor(typeof(Drawer));
                     inputContainer.Add(Inputs[0]);
 
                     if (dialogue is not DialogueRoot)
                     {
                         Inputs[1] = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Multi,
                             typeof(Storyline));
-                        Inputs[1].portColor = DialogueColor;
+                        Inputs[1].portColor = GetColor(typeof(Storyline));
                         inputContainer.Add(Inputs[1]);
                     }
 
                     Inputs[2] = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Single,
-                        typeof(BranchChoiser));
-                    Inputs[2].portColor = ChoiserColor;
+                        typeof(BranchChoicer));
+                    Inputs[2].portColor = GetColor(typeof(BranchChoicer));
                     inputContainer.Add(Inputs[2]);
 
                     Inputs[3] = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Multi,
                         typeof(Property));
-                    Inputs[3].portColor = PropertyColor;
+                    Inputs[3].portColor = GetColor(typeof(Property));
                     inputContainer.Add(Inputs[3]);
-                    return;
-                case Drawer:
-                    InputFields = node.GetType().GetFields().Where(field => field.HasAttribute(typeof(InputPort))).ToArray();
-
-                    Inputs = new Port[InputFields.Length + 1];
-                    Inputs[0] = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Single, typeof(TextContainer));
-                    Inputs[0].portColor = ContentColor;
-                    inputContainer.Add(Inputs[0]);
-                    
-                    for (var i = 1; i <= InputFields.Length; i++)
-                    {
-                        var inputPort = InputFields[i - 1].GetAttribute<InputPort>();
-
-                        Port.Capacity capacity;
-                        var type = InputFields[i - 1].GetType();
-                        if (type.IsGenericType && type.GetInterface(nameof(IList)) != null)
-                        {
-                            capacity = Port.Capacity.Multi;
-                            type = type.GetGenericArguments()[0];
-                        }
-                        else capacity = Port.Capacity.Single;
-                        
-                        Inputs[i] = InstantiatePort(Orientation.Horizontal,Direction.Input, capacity, type);
-                        Inputs[i].portColor = new Color(
-                            (float) (inputPort.color & 255) / 255,
-                            (float) ((inputPort.color >> 8) & 255) / 255,
-                            (float) ((inputPort.color >> 16) & 255) / 255
-                        );
-                        inputContainer.Add(Inputs[i]);
-                    }
                     return;
                 default:
                     InputFields = node.GetType().GetFields().Where(field => field.HasAttribute(typeof(InputPort))).ToArray();
@@ -122,15 +83,10 @@ namespace Plugins.DialogueSystem.Editor.DialogueGraph
                         else capacity = Port.Capacity.Single;
 
                         Inputs[i] = InstantiatePort(Orientation.Horizontal, Direction.Input, capacity, type);
-                        Inputs[i].portColor = new Color(
-                            (float)(inputPort.color & 255) / 255,
-                            (float)((inputPort.color >> 8) & 255) / 255,
-                            (float)((inputPort.color >> 16) & 255) / 255
-                        );
+                        Inputs[i].portColor = GetColor(type);
                         if (inputPort.name != null) Inputs[i].portName = inputPort.name;
                         inputContainer.Add(Inputs[i]);
                     }
-
                     return;
             }
         }
@@ -141,46 +97,40 @@ namespace Plugins.DialogueSystem.Editor.DialogueGraph
             {
                 case Storyline dialogueNode:
                     Outputs = new Port[dialogueNode.next.Count];
+
+                    Color portColor;
+                    string portName;
+                    if (node.GetType().HasAttribute(typeof(OutputPort)))
+                    {
+                        var outputPort = node.GetType().GetAttribute<OutputPort>();
+                        portColor = GetColor(outputPort.type);
+                        portName = outputPort.name;
+                    }
+                    else
+                    {
+                        portColor = new Color(1, 1, 1);
+                        portName = node.GetType().Name;
+                    }
                     for (var i = 0; i < Outputs.Length; i++)
                     {
                         Outputs[i] = InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Single, typeof(Storyline));
-                        Outputs[i].portColor = DialogueColor;
+                        Outputs[i].portColor = portColor;
+                        Outputs[i].portName = portName;
                         outputContainer.Add(Outputs[i]);
                     }
                     return;
-                case Property:
+                default:
                     Outputs = new[] {
-                        InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Multi, typeof(Property))
+                        InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Multi, node.GetType())
                     };
-                    Outputs[0].portColor = PropertyColor;
-                    outputContainer.Add(Outputs[0]);
-                    return;
-                case BranchChoiser:
-                    Outputs = new[] {
-                        InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Multi, typeof(BranchChoiser))
-                    };
-                    Outputs[0].portColor = ChoiserColor;
-                    outputContainer.Add(Outputs[0]);
-                    return;
-                case Drawer:
-                    Outputs = new[] {
-                        InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Multi, typeof(Drawer))
-                    };
-                    Outputs[0].portColor = DrawerColor;
-                    outputContainer.Add(Outputs[0]);
-                    return;
-                case TextContainer:
-                    Outputs = new[] {
-                        InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Multi, typeof(TextContainer))
-                    };
-                    Outputs[0].portColor = ContentColor;
-                    outputContainer.Add(Outputs[0]);
-                    return;
-                case ValueNode:
-                    Outputs = new[] {
-                        InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Multi, typeof(ValueNode))
-                    };
-                    Outputs[0].portColor = ValueColor;
+                    if (node.GetType().HasAttribute(typeof(OutputPort)))
+                    {
+                        var outputPort = node.GetType().GetAttribute<OutputPort>();
+                        Outputs[0].portType = outputPort.type;
+                        Outputs[0].portColor = GetColor(outputPort.type);
+                        Outputs[0].portName = outputPort.name;
+                    }
+
                     outputContainer.Add(Outputs[0]);
                     return;
             }
@@ -204,6 +154,18 @@ namespace Plugins.DialogueSystem.Editor.DialogueGraph
         {
             base.OnSelected();
             onNodeSelected?.Invoke(this);
+        }
+
+        private static Color GetColor(Type type)
+        {
+            var t = type;
+            while (t != null)
+            {
+                if (NodeColors.Colors.TryGetValue(t, out var color))
+                    return color;
+                t = t.BaseType;
+            }
+            return new Color(1, 1, 1);
         }
     }
 }

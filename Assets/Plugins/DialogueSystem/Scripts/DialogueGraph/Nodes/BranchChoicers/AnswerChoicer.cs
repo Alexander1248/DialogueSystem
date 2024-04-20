@@ -5,9 +5,9 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.BranchChoisers
+namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.BranchChoicers
 {
-    public class AnswerChoiser : BranchChoiser
+    public class AnswerChoicer : BranchChoicer
     {
         [SerializeField] private GameObject answerPrefab;
         [SerializeField] private string answersRootKey;
@@ -46,8 +46,8 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.BranchChoisers
             }
 
             _listener = Click;
-            _isManual = dialogue.Manual;
-            dialogue.Manual = true;
+            _isManual = dialogue.manual;
+            dialogue.manual = true;
             while (_answers.Count < answers.Length)
             {
                 var answerGameObject = Instantiate(answerPrefab);
@@ -107,13 +107,19 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.BranchChoisers
                     break;
                 }
 
-            dialogue.Manual = _isManual;
+            dialogue.manual = _isManual;
             dialogue.ToNext();
         }
 
         public override AbstractNode Clone()
         {
             var node = Instantiate(this);
+            node.answerPrefab = answerPrefab;
+            node.answersRootKey = answersRootKey;
+            node.answers = answers;
+            node.late = late;
+            node.pivot = pivot;
+            node.margin = margin;
             return node;
         }
     }

@@ -10,6 +10,7 @@ using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UIElements;
+using IList = System.Collections.IList;
 
 namespace Plugins.DialogueSystem.Editor.DialogueGraph
 {
@@ -42,13 +43,6 @@ namespace Plugins.DialogueSystem.Editor.DialogueGraph
             // base.BuildContextualMenu(evt);
             evt.menu.AppendAction("Update", _ => PopulateView(_graph));
             evt.menu.AppendSeparator();
-
-            var choisers = new List<Type>();
-            var drawers = new List<Type>();
-            var properties = new List<Type>();
-            var storylines = new List<Type>();
-            var containers = new List<Type>();
-            var values = new List<Type>();
             
             var types = TypeCache.GetTypesDerivedFrom<AbstractNode>();
             foreach (var type in types.Where(type => !type.IsAbstract))
@@ -57,57 +51,43 @@ namespace Plugins.DialogueSystem.Editor.DialogueGraph
                 while (root != null) {
                     if (root == typeof(Storyline))
                     {
-                        storylines.Add(type);
+                        evt.menu.AppendAction($"Storylines/{type.Name}", 
+                            _ => CreateNode(type, worldMousePosition));
                         break;
                     }
                     if (root == typeof(Drawer))
                     {
-                        drawers.Add(type);
+                        evt.menu.AppendAction($"Drawers/{type.Name}", 
+                            _ => CreateNode(type, worldMousePosition));
                         break;
                     }
                     if (root == typeof(TextContainer))
                     {
-                        containers.Add(type);
+                        evt.menu.AppendAction($"TextContainers/{type.Name}", 
+                            _ => CreateNode(type, worldMousePosition));
                         break;
                     }
-                    if (root == typeof(BranchChoiser))
+                    if (root == typeof(BranchChoicer))
                     {
-                        choisers.Add(type);
+                        evt.menu.AppendAction($"BranchChoicers/{type.Name}", 
+                            _ => CreateNode(type, worldMousePosition));
                         break;
                     }
                     if (root == typeof(Property))
                     {
-                        properties.Add(type);
+                        evt.menu.AppendAction($"Properties/{type.Name}", 
+                            _ => CreateNode(type, worldMousePosition));
                         break;
                     }
-                    if (root == typeof(ValueNode))
+                    if (root == typeof(Value))
                     {
-                        values.Add(type);
+                        evt.menu.AppendAction($"Values/{type.Name}", 
+                            _ => CreateNode(type, worldMousePosition));
                         break;
                     }
                     root = root.BaseType;
                 }
             }
-            
-            
-            evt.menu.AppendSeparator();
-            storylines.ForEach(type => evt.menu.AppendAction($"{type.Name}", _ => CreateNode(type, worldMousePosition)));
-            
-            evt.menu.AppendSeparator();
-            drawers.ForEach(type => evt.menu.AppendAction($"{type.Name}", _ => CreateNode(type, worldMousePosition)));
-           
-            evt.menu.AppendSeparator();
-            containers.ForEach(type => evt.menu.AppendAction($"{type.Name}", _ => CreateNode(type, worldMousePosition)));
-            
-            evt.menu.AppendSeparator();
-            choisers.ForEach(type => evt.menu.AppendAction($"{type.Name}", _ => CreateNode(type, worldMousePosition)));
-            
-            evt.menu.AppendSeparator();
-            properties.ForEach(type => evt.menu.AppendAction($"{type.Name}", _ => CreateNode(type, worldMousePosition)));
-            
-            evt.menu.AppendSeparator();
-            values.ForEach(type => evt.menu.AppendAction($"{type.Name}", _ => CreateNode(type, worldMousePosition)));
-                
         }
 
         private void CreateNode(Type type, Vector2 position)
@@ -145,47 +125,28 @@ namespace Plugins.DialogueSystem.Editor.DialogueGraph
                         foreach (var key in storyline.next.Keys.Where(key => storyline.next[key] != null))
                             AddElement(view.Outputs[key].ConnectTo(FindNodeView(storyline.next[key]).Inputs[1]));
 
-                        if (storyline.branchChoiser != null)
-                            AddElement(FindNodeView(storyline.branchChoiser).Outputs[0].ConnectTo(view.Inputs[2]));
+                        if (storyline.branchChoicer != null)
+                            AddElement(FindNodeView(storyline.branchChoicer).Outputs[0].ConnectTo(view.Inputs[2]));
 
                         foreach (var property in storyline.properties)
                             AddElement(FindNodeView(property).Outputs[0].ConnectTo(view.Inputs[3]));
                         return;
-
-                    case Drawer drawer:
-                        if (drawer.container != null)
-                            AddElement(FindNodeView(drawer.container).Outputs[0].ConnectTo(view.Inputs[0]));
-                        for (var i = 0; i < view.InputFields.Length; i++)
-                        {
-                            var type = view.InputFields[i].FieldType;
-                            if (type.IsGenericType && type.GetInterface(nameof(IList)) != null)
-                            {
-                                var value = view.InputFields[i].GetValue(drawer) as IList<AbstractNode>;
-                                foreach (var val in value)
-                                    AddElement(FindNodeView(val).Outputs[0].ConnectTo(view.Inputs[i + 1]));
-                            }
-                            else
-                            {
-                                var value = view.InputFields[i].GetValue(drawer) as AbstractNode;
-                                AddElement(FindNodeView(value).Outputs[0].ConnectTo(view.Inputs[i + 1]));
-                            }
-                        }
-                        return;
-
                     default:
                         for (var i = 0; i < view.InputFields.Length; i++)
                         {
                             var type = view.InputFields[i].FieldType;
                             if (type.IsGenericType && type.GetInterface(nameof(IList)) != null)
                             {
-                                var value = view.InputFields[i].GetValue(n) as IList<AbstractNode>;
-                                foreach (var val in value)
-                                    AddElement(FindNodeView(val).Outputs[0].ConnectTo(view.Inputs[i + 1]));
+                                var values = view.InputFields[i].GetValue(n) as IList;
+                                if (values == null) continue;
+                                foreach (var value in values)
+                                    if (value is AbstractNode node) 
+                                        AddElement(FindNodeView(node).Outputs[0].ConnectTo(view.Inputs[i]));
                             }
                             else
                             {
                                 var value = view.InputFields[i].GetValue(n) as AbstractNode;
-                                AddElement(FindNodeView(value).Outputs[0].ConnectTo(view.Inputs[i + 1]));
+                                if (value) AddElement(FindNodeView(value).Outputs[0].ConnectTo(view.Inputs[i]));
                             }
                         }
                         return;
@@ -201,6 +162,7 @@ namespace Plugins.DialogueSystem.Editor.DialogueGraph
 
         private GraphViewChange OnGraphViewChanged(GraphViewChange graphViewChange)
         {
+            int index;
             graphViewChange.elementsToRemove?.ForEach(elem =>
             {
                 switch (elem)
@@ -222,17 +184,31 @@ namespace Plugins.DialogueSystem.Editor.DialogueGraph
                                         RemoveProperty(toStoryline, fromProperty);
                                         return;
                                     default:
-                                        Debug.LogError("To node strange type!");
+                                        index = -1;
+                                        for (var i = 0; i < to.Inputs.Length; i++)
+                                            if (to.Inputs[i] == edge.input)
+                                            {
+                                                index = i;
+                                                break;
+                                            }
+                                        Remove(fromProperty, to, index);
                                         return;
                                 }
-                            case BranchChoiser:
+                            case BranchChoicer fromChoiser:
                                 switch (to.node)
                                 {
                                     case Storyline toStoryline:
-                                        toStoryline.branchChoiser = null;
+                                        toStoryline.branchChoicer = null;
                                         return;
                                     default:
-                                        Debug.LogError("To node strange type!");
+                                        index = -1;
+                                        for (var i = 0; i < to.Inputs.Length; i++)
+                                            if (to.Inputs[i] == edge.input)
+                                            {
+                                                index = i;
+                                                break;
+                                            }
+                                        Remove(fromChoiser, to, index);
                                         return;
                                 }
                             case Drawer fromDrawer:
@@ -245,31 +221,36 @@ namespace Plugins.DialogueSystem.Editor.DialogueGraph
                                         fromDrawer.container = null;
                                         return;
                                     default:
-                                        Debug.LogError("To node strange type!");
+                                        index = -1;
+                                        for (var i = 0; i < to.Inputs.Length; i++)
+                                            if (to.Inputs[i] == edge.input)
+                                            {
+                                                index = i;
+                                                break;
+                                            }
+                                        Remove(fromDrawer, to, index);
                                         return;
                                 }
-                            case TextContainer:
+                            case TextContainer fromContainer:
                                 switch (to.node)
                                 {
                                     case Drawer toDrawer:
                                         toDrawer.container = null;
                                         return;
                                     default:
-                                        Debug.LogError("To node strange type!");
+                                        index = -1;
+                                        for (var i = 0; i < to.Inputs.Length; i++)
+                                            if (to.Inputs[i] == edge.input)
+                                            {
+                                                index = i;
+                                                break;
+                                            }
+                                        Remove(fromContainer, to, index);
                                         return;
                                 }
                             case Storyline fromStoryline:
                                 switch (to.node)
                                 {
-                                    case Property toProperty:
-                                        RemoveProperty(fromStoryline, toProperty);
-                                        return;
-                                    case BranchChoiser:
-                                        fromStoryline.branchChoiser = null;
-                                        return;
-                                    case Drawer:
-                                        fromStoryline.drawer = null;
-                                        return;
                                     case Storyline toDialogue:
                                         RemoveLink(fromStoryline, toDialogue);
                                         return;
@@ -278,7 +259,14 @@ namespace Plugins.DialogueSystem.Editor.DialogueGraph
                                         return;
                                 }
                             default:
-                                Debug.LogError("From node strange type!");
+                                index = -1;
+                                for (var i = 0; i < to.Inputs.Length; i++)
+                                    if (to.Inputs[i] == edge.input)
+                                    {
+                                        index = i;
+                                        break;
+                                    }
+                                Remove(from.node, to, index);
                                 return;
                         }
                     }
@@ -299,17 +287,31 @@ namespace Plugins.DialogueSystem.Editor.DialogueGraph
                                 AddProperty(toStoryline, fromProperty);
                                 return;
                             default:
-                                Debug.LogError("To node strange type!");
+                                index = -1;
+                                for (var i = 0; i < to.Inputs.Length; i++)
+                                    if (to.Inputs[i] == edge.input)
+                                    {
+                                        index = i;
+                                        break;
+                                    }
+                                Add(fromProperty, to, index);
                                 return;
                         }
-                    case BranchChoiser fromChoiser:
+                    case BranchChoicer fromChoiser:
                         switch (to.node)
                         {
                             case Storyline toStoryline:
-                                toStoryline.branchChoiser = fromChoiser;
+                                toStoryline.branchChoicer = fromChoiser;
                                 return;
                             default:
-                                Debug.LogError("To node strange type!");
+                                index = -1;
+                                for (var i = 0; i < to.Inputs.Length; i++)
+                                    if (to.Inputs[i] == edge.input)
+                                    {
+                                        index = i;
+                                        break;
+                                    }
+                                Add(fromChoiser, to, index);
                                 return;
                         }
                     case Drawer fromDrawer:
@@ -318,39 +320,38 @@ namespace Plugins.DialogueSystem.Editor.DialogueGraph
                             case Storyline toStoryline:
                                 toStoryline.drawer = fromDrawer;
                                 return;
-                            case TextContainer toHandler:
-                                fromDrawer.container = toHandler;
-                                return;
                             default:
-                                Debug.LogError("To node strange type!");
+                                index = -1;
+                                for (var i = 0; i < to.Inputs.Length; i++)
+                                    if (to.Inputs[i] == edge.input)
+                                    {
+                                        index = i;
+                                        break;
+                                    }
+                                Add(fromDrawer, to, index);
                                 return;
                         }
-                    case TextContainer fromHandler:
+                    case TextContainer fromContainer:
                         switch (to.node)
                         {
-                            case Drawer toDrawer:
-                                toDrawer.container = fromHandler;
-                                return;
                             default:
-                                Debug.LogError("To node strange type!");
+                                index = -1;
+                                for (var i = 0; i < to.Inputs.Length; i++)
+                                    if (to.Inputs[i] == edge.input)
+                                    {
+                                        index = i;
+                                        break;
+                                    }
+                                Add(fromContainer, to, index);
                                 return;
                         }
                     case Storyline fromStoryline:
                         switch (to.node)
                         {
-                            case Property toProperty:
-                                AddProperty(fromStoryline, toProperty);
-                                return;
-                            case BranchChoiser toChoiser:
-                                fromStoryline.branchChoiser = toChoiser;
-                                return;
-                            case Drawer toDrawer:
-                                fromStoryline.drawer = toDrawer;
-                                return;
                             case Storyline toDialogue:
-                                var index = 0;
+                                index = -1;
                                 for (var i = 0; i < from.Outputs.Length; i++)
-                                    if (from.Outputs[i] == edge.output)
+                                    if (from.Outputs[i] == edge.input)
                                     {
                                         index = i;
                                         break;
@@ -362,7 +363,14 @@ namespace Plugins.DialogueSystem.Editor.DialogueGraph
                                 return;
                         }
                     default:
-                        Debug.LogError("From node strange type!");
+                        index = -1;
+                        for (var i = 0; i < to.Inputs.Length; i++)
+                            if (to.Inputs[i] == edge.input)
+                            {
+                                index = i;
+                                break;
+                            }
+                        Add(from.node, to, index);
                         return;
                 }
             });
@@ -439,28 +447,31 @@ namespace Plugins.DialogueSystem.Editor.DialogueGraph
         {
             node.properties.Remove(property);
         }
-        private static void Add(NodeView from, int index, AbstractNode to)
+        private static void Add(AbstractNode from, NodeView to, int index)
         {
-            var type = from.InputFields[index].FieldType;
+            if (index < 0 || index >= to.InputFields.Length)
+                throw new ArgumentException("Wrong argument index!");
+            
+            var type = to.InputFields[index].FieldType;
             if (type.IsGenericType && type.GetInterface(nameof(IList)) != null)
             {
-                var value = from.InputFields[index].GetValue(from.node) as IList<AbstractNode>;
-                value.Add(to);
+                var value = to.InputFields[index].GetValue(to.node) as IList;
+                value.Add(from);
                     
             }
-            else from.InputFields[index].SetValue(from.node, to);
+            else to.InputFields[index].SetValue(to.node, from);
 
         }
-        private static void Remove(NodeView from, int index, AbstractNode to)
+        private static void Remove(AbstractNode from, NodeView to, int index)
         {
-            var type = from.InputFields[index].FieldType;
+            var type = to.InputFields[index].FieldType;
             if (type.IsGenericType && type.GetInterface(nameof(IList)) != null)
             {
-                var value = from.InputFields[index].GetValue(from.node) as IList<AbstractNode>;
-                value.Remove(to);
+                var value = to.InputFields[index].GetValue(to.node) as IList;
+                value.Remove(from);
                     
             }
-            else from.InputFields[index].SetValue(from.node, null);
+            else to.InputFields[index].SetValue(to.node, null);
         }
     }
 }

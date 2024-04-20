@@ -5,6 +5,7 @@ using Plugins.DialogueSystem.Scripts.Utils;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 using Object = UnityEngine.Object;
 
 namespace Plugins.DialogueSystem.Scripts.DialogueGraph
@@ -13,6 +14,9 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph
     {
         [SerializeField] private UDictionary<string, Narrator> narrators;
         [SerializeField] private DialogueGraph graph;
+        public bool manual;
+        public bool canSkip = true;
+        public KeyCode skipKey = KeyCode.Return;
         [Space]
         [SerializeField] private UDictionary<string, Object> data;
         [Space]
@@ -25,7 +29,6 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph
 
         public bool IsStarted => _current != null;
         public bool IsPlaying { get; private set; }
-        public bool Manual { get; set; }
         
         
         public UDictionary<string, Object> Data => data;
@@ -71,7 +74,7 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph
         private void Update()
         {
             if (_current.IsUnityNull() || !IsPlaying) return;
-            if (Input.GetKeyDown(KeyCode.Return))
+            if (canSkip && Input.GetKeyDown(skipKey))
             {
                 CancelInvoke(nameof(GoToNext));
                 GoToNext();
@@ -86,7 +89,7 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph
                 || _current.drawer.IsCompleted())
             {
                 _current.OnDrawEnd(this);
-                if (!Manual) ToNext();
+                if (!manual) ToNext();
                 _wait = true;
             }
         }

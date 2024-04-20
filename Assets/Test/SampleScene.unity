@@ -596,6 +596,9 @@ MonoBehaviour:
       minPitch: 0
       maxPitch: 0
   graph: {fileID: 11400000, guid: 62098f9b27f13494f978e13b9d671ddb, type: 2}
+  manual: 0
+  canSkip: 1
+  skipKey: 13
   data:
     keys:
     - AnswerRoot

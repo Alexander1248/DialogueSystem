@@ -59,25 +59,6 @@ MonoBehaviour:
   - {fileID: 3477967268019126336}
   - {fileID: 936737059620869442}
   - {fileID: 7250557118767858906}
-  - {fileID: 800542968366858421}
-  - {fileID: 3611843423651944157}
---- !u!114 &800542968366858421
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b4e8a5eac7ac4d65b40adc3930f06c1b, type: 3}
-  m_Name: Comparison
-  m_EditorClassIdentifier: 
-  guid: acd44bd8727e90743bf0263b865df92f
-  nodePos: {x: -95, y: 477.5}
-  a: {fileID: 0}
-  b: {fileID: 0}
-  filter: 0
 --- !u!114 &936737059620869442
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -118,21 +99,6 @@ MonoBehaviour:
     keys: 
     values: []
   defaultSymbolTime: 0.1
---- !u!114 &3611843423651944157
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a8fc1e7b4d6d4aa7be61fdf3958f0dc8, type: 3}
-  m_Name: ConditionChoiser
-  m_EditorClassIdentifier: 
-  guid: e905b977e37ea60429b08d6edc59228d
-  nodePos: {x: 207, y: 451.31998}
-  conditions: []
 --- !u!114 &5163449846102081087
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -166,7 +132,7 @@ MonoBehaviour:
     keys: 00000000
     values:
     - {fileID: 7884964881229149843}
-  branchChoiser: {fileID: 0}
+  branchChoicer: {fileID: 0}
   drawer: {fileID: 3477967268019126336}
   properties: []
   tag: 
@@ -239,7 +205,7 @@ MonoBehaviour:
     keys: 00000000
     values:
     - {fileID: 7884964881229149843}
-  branchChoiser: {fileID: 0}
+  branchChoicer: {fileID: 0}
   drawer: {fileID: 8614283219920653837}
   properties: []
   tag: 
@@ -264,7 +230,7 @@ MonoBehaviour:
     - {fileID: 8893492305041016260}
     - {fileID: 5740231457469687333}
     - {fileID: 7340402515593186826}
-  branchChoiser: {fileID: 7250557118767858906}
+  branchChoicer: {fileID: 7250557118767858906}
   drawer: {fileID: 6724269093612238378}
   properties: []
   tag: 
@@ -307,7 +273,7 @@ MonoBehaviour:
     keys: 00000000
     values:
     - {fileID: 7884964881229149843}
-  branchChoiser: {fileID: 0}
+  branchChoicer: {fileID: 0}
   drawer: {fileID: 0}
   properties: []
   tag: 
@@ -331,7 +297,7 @@ MonoBehaviour:
     keys: 00000000
     values:
     - {fileID: 7884964881229149843}
-  branchChoiser: {fileID: 0}
+  branchChoicer: {fileID: 0}
   drawer: {fileID: 936737059620869442}
   properties: []
   tag: 
