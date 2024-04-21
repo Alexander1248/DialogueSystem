@@ -45,15 +45,7 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\2022.3.12f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\Plugins\DialogueSystem\Editor\DialogueGraph\DialogueGraphView.cs" />
-     <Compile Include="Assets\Plugins\DialogueSystem\Editor\DialogueGraph\DialogueGraphEditor.cs" />
-     <Compile Include="Assets\Plugins\DialogueSystem\Editor\DialogueGraph\InspectorView.cs" />
-     <Compile Include="Assets\Plugins\DialogueSystem\Editor\DialogueGraph\SplitView.cs" />
-     <Compile Include="Assets\Plugins\DialogueSystem\Editor\DialogueGraph\NodeView.cs" />
-     <None Include="Assets\Plugins\DialogueSystem\Editor\DialogueGraph\DialogueGraphEditor.uxml" />
-     <Folder Include="Assets\Plugins\DialogueSystem\Editor" />
-     <Folder Include="Assets\Plugins\DialogueSystem\Editor\DialogueGraph" />
-     <None Include="Assets\Plugins\DialogueSystem\Editor\DialogueGraph\DialogueGraphEditor.uss" />
+     <Folder Include="Assets\Plugins\DialogueSystem\" />
      <Reference Include="UnityEngine">
      <HintPath>C:\Program Files\Unity\Hub\Editor\2022.3.12f1\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>
      </Reference>

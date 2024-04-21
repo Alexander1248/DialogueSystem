@@ -11,6 +11,7 @@ namespace Plugins.DialogueSystem.Editor.DialogueGraph
         public void UpdateSelection(NodeView view)
         {
             Clear();
+            if (view == null || view.node == null) return;
             _editor = UnityEditor.Editor.CreateEditor(view.node);
             Add(new IMGUIContainer(() => _editor.OnInspectorGUI()));
         }

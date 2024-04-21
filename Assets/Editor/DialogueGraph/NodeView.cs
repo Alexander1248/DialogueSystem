@@ -21,6 +21,7 @@ namespace Plugins.DialogueSystem.Editor.DialogueGraph
         public readonly AbstractNode node;
         
         public FieldInfo[] InputFields { get; private set; }
+        public int shift;
         public Port[] Inputs { get; private set; }
         public  Port[] Outputs { get; private set; }
         public NodeView(AbstractNode node)
@@ -41,32 +42,38 @@ namespace Plugins.DialogueSystem.Editor.DialogueGraph
             switch (node)
             {
                 case Storyline dialogue:
-                    Inputs = new Port[4];
-
-                    Inputs[0] = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Single,
-                        typeof(Drawer));
-                    Inputs[0].portColor = GetColor(typeof(Drawer));
-                    inputContainer.Add(Inputs[0]);
-
+                    shift = 1;
+                    InputFields = node.GetType().GetFields().Where(field => field.HasAttribute(typeof(InputPort))).ToArray();
+                    Inputs = new Port[InputFields.Length + 1];
                     if (dialogue is not DialogueRoot)
                     {
-                        Inputs[1] = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Multi,
+                        Inputs[0] = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Multi,
                             typeof(Storyline));
-                        Inputs[1].portColor = GetColor(typeof(Storyline));
-                        inputContainer.Add(Inputs[1]);
+                        Inputs[0].portColor = GetColor(typeof(Storyline));
+                        inputContainer.Add(Inputs[0]);
                     }
+                    for (var i = 1; i <= InputFields.Length; i++)
+                    {
+                        var inputPort = InputFields[i - 1].GetAttribute<InputPort>();
 
-                    Inputs[2] = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Single,
-                        typeof(BranchChoicer));
-                    Inputs[2].portColor = GetColor(typeof(BranchChoicer));
-                    inputContainer.Add(Inputs[2]);
+                        Port.Capacity capacity;
+                        var type = InputFields[i - 1].FieldType;
+                        if (type.IsGenericType && type.GetInterface(nameof(IList)) != null)
+                        {
+                            capacity = Port.Capacity.Multi;
+                            type = type.GetGenericArguments()[0];
+                        }
+                        else capacity = Port.Capacity.Single;
 
-                    Inputs[3] = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Multi,
-                        typeof(Property));
-                    Inputs[3].portColor = GetColor(typeof(Property));
-                    inputContainer.Add(Inputs[3]);
+                        Inputs[i] = InstantiatePort(Orientation.Horizontal, Direction.Input, capacity, type);
+                        Inputs[i].portColor = GetColor(type);
+                        if (inputPort.name != null) Inputs[i].portName = inputPort.name;
+                        inputContainer.Add(Inputs[i]);
+                    }
+                    
                     return;
                 default:
+                    shift = 0;
                     InputFields = node.GetType().GetFields().Where(field => field.HasAttribute(typeof(InputPort))).ToArray();
                     Inputs = new Port[InputFields.Length];
                     for (var i = 0; i < InputFields.Length; i++)

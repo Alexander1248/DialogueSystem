@@ -17,9 +17,18 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes
             NodeColors.Colors.Add(typeof(Storyline), new Color(0, 0.5f, 0));
         }
         [HideInInspector] public UDictionary<int, Storyline> next = new();
-        [FormerlySerializedAs("branchChoiser")] [HideInInspector] public BranchChoicer branchChoicer;
-        [FormerlySerializedAs("contextHandler")] [HideInInspector] public Drawer drawer;
-        [HideInInspector] public List<Property> properties = new();
+        
+        [InputPort("Drawer")]
+        [HideInInspector] 
+        public Drawer drawer;
+        
+        [InputPort("BranchChoicer")]
+        [HideInInspector]
+        public BranchChoicer branchChoicer;
+        
+        [InputPort("Properties")]
+        [HideInInspector] 
+        public List<Property> properties = new();
         public string tag;
         public float delay = 1;
 

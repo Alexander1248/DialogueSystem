@@ -22,10 +22,10 @@ namespace Plugins.DialogueSystem.Editor.DialogueGraph
         {
             VisualElement root = rootVisualElement;
 
-            var visualTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Plugins/DialogueSystem/Editor/DialogueGraph/DialogueGraphEditor.uxml");
+            var visualTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Editor/DialogueGraph/DialogueGraphEditor.uxml");
             visualTree.CloneTree(root);
         
-            var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/Plugins/DialogueSystem/Editor/DialogueGraph/DialogueGraphEditor.uss");
+            var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/Editor/DialogueGraph/DialogueGraphEditor.uss");
             root.styleSheets.Add(styleSheet);
 
             _graphView = root.Q<DialogueGraphView>();

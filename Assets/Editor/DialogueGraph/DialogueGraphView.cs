@@ -1,15 +1,16 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Codice.CM.SEIDInfo;
-using Plugins.DialogueSystem.Scripts;
+using Plugins.DialogueSystem.Scripts.DialogueGraph.Attributes;
 using Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes;
 using Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.StorylineNodes;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.UIElements;
+using Edge = UnityEditor.Experimental.GraphView.Edge;
 using IList = System.Collections.IList;
 
 namespace Plugins.DialogueSystem.Editor.DialogueGraph
@@ -18,7 +19,11 @@ namespace Plugins.DialogueSystem.Editor.DialogueGraph
     {
         public Action<NodeView> onNodeSelected;
         private Scripts.DialogueGraph.DialogueGraph _graph;
+        
+        private readonly List<AbstractNode> _sample = new();
+        private Vector2 _copyPos; 
 
+        
         public new class UxmlFactory : UxmlFactory<DialogueGraphView, UxmlTraits> { }
 
         public DialogueGraphView()
@@ -28,11 +33,31 @@ namespace Plugins.DialogueSystem.Editor.DialogueGraph
             this.AddManipulator( new ContentDragger());
             this.AddManipulator(new SelectionDragger());
             this.AddManipulator(new RectangleSelector());
+
+            RegisterCallback<KeyDownEvent>(KeyDown);
             
-            var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/Plugins/DialogueSystem/Editor/DialogueGraph/DialogueGraphEditor.uss");
+            var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/Editor/DialogueGraph/DialogueGraphEditor.uss");
             styleSheets.Add(styleSheet);
         }
 
+        private void KeyDown(KeyDownEvent evt)
+        {
+            var container = ElementAt(1);
+            Vector3 screenMousePosition = evt.originalMousePosition;
+            Vector2 worldMousePosition = screenMousePosition - container.transform.position;
+            worldMousePosition *= 1 / container.transform.scale.x;
+            
+            switch (evt.keyCode)
+            {
+                case KeyCode.C:
+                    if (evt.ctrlKey) Copy(worldMousePosition);
+                    return;
+                case KeyCode.V:
+                    if (evt.ctrlKey) Paste(worldMousePosition);
+                    return;
+            }
+        }
+        
         public override void BuildContextualMenu(ContextualMenuPopulateEvent evt)
         {
             var container = ElementAt(1);
@@ -41,7 +66,10 @@ namespace Plugins.DialogueSystem.Editor.DialogueGraph
             worldMousePosition *= 1 / container.transform.scale.x;
             
             // base.BuildContextualMenu(evt);
+            evt.menu.AppendAction("To Coordinates", _ => container.transform.position = Vector3.zero);
             evt.menu.AppendAction("Update", _ => PopulateView(_graph));
+            evt.menu.AppendAction("Copy", _ => Copy(worldMousePosition));
+            evt.menu.AppendAction("Paste", _ => Paste(worldMousePosition));
             evt.menu.AppendSeparator();
             
             var types = TypeCache.GetTypesDerivedFrom<AbstractNode>();
@@ -90,11 +118,70 @@ namespace Plugins.DialogueSystem.Editor.DialogueGraph
             }
         }
 
+        private void Paste(Vector2 worldMousePosition)
+        {
+            var clones = new Dictionary<AbstractNode, AbstractNode>();
+            foreach (var node in _sample)
+                clones[node] = CreateNodeCopy(node, node.nodePos + worldMousePosition - _copyPos);
+
+            foreach (var node in _sample)
+            {
+                var clone = clones[node];
+                foreach (var field in node.GetType().GetFields())
+                {
+                    if (!field.HasAttribute(typeof(InputPort))) continue;
+                    
+                    if (field.FieldType.IsGenericType && field.FieldType.GetInterface(nameof(IList)) != null)
+                    {
+                        if (field.GetValue(node) is not IList values) continue;
+                        var list = (IList) Activator.CreateInstance(field.FieldType);
+                        foreach (var value in values)
+                            if (value is AbstractNode n)
+                                list.Add(n == null ? null : clones.GetValueOrDefault(n, n));
+                        field.SetValue(clone, list);
+                    }
+                    else
+                    {
+                        var value = field.GetValue(node) as AbstractNode;
+                        field.SetValue(clone, value == null ? null : clones.GetValueOrDefault(value, value));
+                    }
+                }
+                    
+                if (node is not Storyline storyline) continue;
+                var storylineClone = clone as Storyline;
+                foreach (var key in storyline.next.Keys)
+                {
+                    storylineClone!.next[key] = storyline.next[key] == null
+                        ? null
+                        : clones[storyline.next[key]] as Storyline;
+                }
+            }
+                
+            
+            UpdateView();
+        }
+
+        private void Copy(Vector2 worldMousePosition)
+        {
+            _sample.Clear();
+            _copyPos = worldMousePosition;
+            foreach (var selectable in selection)
+                if (selectable is NodeView view) 
+                    _sample.Add(view.node);
+        }
+
         private void CreateNode(Type type, Vector2 position)
         {
-            AbstractNode node = CreateNode(type);
+            var node = CreateNode(type);
             node.nodePos = position;
             CreateNodeView(node);
+        }
+        private AbstractNode CreateNodeCopy(AbstractNode node, Vector2 position)
+        {
+            var copy = CreateCopy(node);
+            copy.nodePos = position;
+            CreateNodeView(copy);
+            return copy;
         }
 
         private NodeView FindNodeView(AbstractNode sentence)
@@ -119,40 +206,36 @@ namespace Plugins.DialogueSystem.Editor.DialogueGraph
                 switch (n)
                 {
                     case Storyline storyline:
-                        if (storyline.drawer != null)
-                            AddElement(FindNodeView(storyline.drawer).Outputs[0].ConnectTo(view.Inputs[0]));
-
                         foreach (var key in storyline.next.Keys.Where(key => storyline.next[key] != null))
-                            AddElement(view.Outputs[key].ConnectTo(FindNodeView(storyline.next[key]).Inputs[1]));
-
-                        if (storyline.branchChoicer != null)
-                            AddElement(FindNodeView(storyline.branchChoicer).Outputs[0].ConnectTo(view.Inputs[2]));
-
-                        foreach (var property in storyline.properties)
-                            AddElement(FindNodeView(property).Outputs[0].ConnectTo(view.Inputs[3]));
+                            AddElement(view.Outputs[key].ConnectTo(FindNodeView(storyline.next[key]).Inputs[0]));
+                        ConnectCustomPorts(view, n);
                         return;
                     default:
-                        for (var i = 0; i < view.InputFields.Length; i++)
-                        {
-                            var type = view.InputFields[i].FieldType;
-                            if (type.IsGenericType && type.GetInterface(nameof(IList)) != null)
-                            {
-                                var values = view.InputFields[i].GetValue(n) as IList;
-                                if (values == null) continue;
-                                foreach (var value in values)
-                                    if (value is AbstractNode node) 
-                                        AddElement(FindNodeView(node).Outputs[0].ConnectTo(view.Inputs[i]));
-                            }
-                            else
-                            {
-                                var value = view.InputFields[i].GetValue(n) as AbstractNode;
-                                if (value) AddElement(FindNodeView(value).Outputs[0].ConnectTo(view.Inputs[i]));
-                            }
-                        }
+                        ConnectCustomPorts(view, n);
                         return;
                 }
             });
             
+        }
+
+        private void ConnectCustomPorts(NodeView view, AbstractNode n)
+        {
+            for (var i = 0; i < view.InputFields.Length; i++)
+            {
+                var type = view.InputFields[i].FieldType;
+                if (type.IsGenericType && type.GetInterface(nameof(IList)) != null)
+                {
+                    if (view.InputFields[i].GetValue(n) is not IList values) continue;
+                    foreach (var value in values)
+                        if (value is AbstractNode node) 
+                            AddElement(FindNodeView(node).Outputs[0].ConnectTo(view.Inputs[i + view.shift]));
+                }
+                else
+                {
+                    var value = view.InputFields[i].GetValue(n) as AbstractNode;
+                    if (value) AddElement(FindNodeView(value).Outputs[0].ConnectTo(view.Inputs[i + view.shift]));
+                }
+            }
         }
 
         private void UpdateView()
@@ -174,80 +257,9 @@ namespace Plugins.DialogueSystem.Editor.DialogueGraph
                     {
                         if (edge.output.node is not NodeView from) return;
                         if (edge.input.node is not NodeView to) return;
-                        
+
                         switch (from.node)
                         {
-                            case Property fromProperty:
-                                switch (to.node)
-                                {
-                                    case Storyline toStoryline:
-                                        RemoveProperty(toStoryline, fromProperty);
-                                        return;
-                                    default:
-                                        index = -1;
-                                        for (var i = 0; i < to.Inputs.Length; i++)
-                                            if (to.Inputs[i] == edge.input)
-                                            {
-                                                index = i;
-                                                break;
-                                            }
-                                        Remove(fromProperty, to, index);
-                                        return;
-                                }
-                            case BranchChoicer fromChoiser:
-                                switch (to.node)
-                                {
-                                    case Storyline toStoryline:
-                                        toStoryline.branchChoicer = null;
-                                        return;
-                                    default:
-                                        index = -1;
-                                        for (var i = 0; i < to.Inputs.Length; i++)
-                                            if (to.Inputs[i] == edge.input)
-                                            {
-                                                index = i;
-                                                break;
-                                            }
-                                        Remove(fromChoiser, to, index);
-                                        return;
-                                }
-                            case Drawer fromDrawer:
-                                switch (to.node)
-                                {
-                                    case Storyline toStoryline:
-                                        toStoryline.drawer = null;
-                                        return;
-                                    case TextContainer:
-                                        fromDrawer.container = null;
-                                        return;
-                                    default:
-                                        index = -1;
-                                        for (var i = 0; i < to.Inputs.Length; i++)
-                                            if (to.Inputs[i] == edge.input)
-                                            {
-                                                index = i;
-                                                break;
-                                            }
-                                        Remove(fromDrawer, to, index);
-                                        return;
-                                }
-                            case TextContainer fromContainer:
-                                switch (to.node)
-                                {
-                                    case Drawer toDrawer:
-                                        toDrawer.container = null;
-                                        return;
-                                    default:
-                                        index = -1;
-                                        for (var i = 0; i < to.Inputs.Length; i++)
-                                            if (to.Inputs[i] == edge.input)
-                                            {
-                                                index = i;
-                                                break;
-                                            }
-                                        Remove(fromContainer, to, index);
-                                        return;
-                                }
                             case Storyline fromStoryline:
                                 switch (to.node)
                                 {
@@ -266,7 +278,8 @@ namespace Plugins.DialogueSystem.Editor.DialogueGraph
                                         index = i;
                                         break;
                                     }
-                                Remove(from.node, to, index);
+
+                                Remove(from.node, to, index - to.shift);
                                 return;
                         }
                     }
@@ -277,85 +290,22 @@ namespace Plugins.DialogueSystem.Editor.DialogueGraph
             {
                 if (edge.output.node is not NodeView from) return;
                 if (edge.input.node is not NodeView to) return;
-                
+
                 switch (from.node)
                 {
-                    case Property fromProperty:
-                        switch (to.node)
-                        {
-                            case Storyline toStoryline:
-                                AddProperty(toStoryline, fromProperty);
-                                return;
-                            default:
-                                index = -1;
-                                for (var i = 0; i < to.Inputs.Length; i++)
-                                    if (to.Inputs[i] == edge.input)
-                                    {
-                                        index = i;
-                                        break;
-                                    }
-                                Add(fromProperty, to, index);
-                                return;
-                        }
-                    case BranchChoicer fromChoiser:
-                        switch (to.node)
-                        {
-                            case Storyline toStoryline:
-                                toStoryline.branchChoicer = fromChoiser;
-                                return;
-                            default:
-                                index = -1;
-                                for (var i = 0; i < to.Inputs.Length; i++)
-                                    if (to.Inputs[i] == edge.input)
-                                    {
-                                        index = i;
-                                        break;
-                                    }
-                                Add(fromChoiser, to, index);
-                                return;
-                        }
-                    case Drawer fromDrawer:
-                        switch (to.node)
-                        {
-                            case Storyline toStoryline:
-                                toStoryline.drawer = fromDrawer;
-                                return;
-                            default:
-                                index = -1;
-                                for (var i = 0; i < to.Inputs.Length; i++)
-                                    if (to.Inputs[i] == edge.input)
-                                    {
-                                        index = i;
-                                        break;
-                                    }
-                                Add(fromDrawer, to, index);
-                                return;
-                        }
-                    case TextContainer fromContainer:
-                        switch (to.node)
-                        {
-                            default:
-                                index = -1;
-                                for (var i = 0; i < to.Inputs.Length; i++)
-                                    if (to.Inputs[i] == edge.input)
-                                    {
-                                        index = i;
-                                        break;
-                                    }
-                                Add(fromContainer, to, index);
-                                return;
-                        }
                     case Storyline fromStoryline:
                         switch (to.node)
                         {
                             case Storyline toDialogue:
                                 index = -1;
                                 for (var i = 0; i < from.Outputs.Length; i++)
-                                    if (from.Outputs[i] == edge.input)
+                                    if (from.Outputs[i] == edge.output)
                                     {
                                         index = i;
                                         break;
                                     }
+
+                                Assert.IsFalse(index < 0, "WTF with Storyline connection!");
                                 AddLink(fromStoryline, index, toDialogue);
                                 return;
                             default:
@@ -370,7 +320,7 @@ namespace Plugins.DialogueSystem.Editor.DialogueGraph
                                 index = i;
                                 break;
                             }
-                        Add(from.node, to, index);
+                        Add(from.node, to, index - to.shift);
                         return;
                 }
             });
@@ -419,6 +369,20 @@ namespace Plugins.DialogueSystem.Editor.DialogueGraph
             
             return node;
         }
+        private AbstractNode CreateCopy(AbstractNode node)
+        {
+            if (_graph == null) throw new Exception("Graph not exists!");
+            var clone = node.Clone();
+            clone.name = node.name;
+            clone.guid = GUID.Generate().ToString();
+            _graph.nodes.Add(clone);
+            if (clone is DialogueRoot r)  _graph.roots.Add(r);
+            
+            AssetDatabase.AddObjectToAsset(clone,  _graph);
+            AssetDatabase.SaveAssets();
+            
+            return clone;
+        }
 
         private void DeleteNode(AbstractNode node)
         {
@@ -464,6 +428,9 @@ namespace Plugins.DialogueSystem.Editor.DialogueGraph
         }
         private static void Remove(AbstractNode from, NodeView to, int index)
         {
+            if (index < 0 || index >= to.InputFields.Length)
+                throw new ArgumentException("Wrong argument index!");
+
             var type = to.InputFields[index].FieldType;
             if (type.IsGenericType && type.GetInterface(nameof(IList)) != null)
             {
@@ -473,5 +440,6 @@ namespace Plugins.DialogueSystem.Editor.DialogueGraph
             }
             else to.InputFields[index].SetValue(to.node, null);
         }
+        
     }
 }
