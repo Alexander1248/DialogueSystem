@@ -1,6 +1,6 @@
 ﻿using UnityEngine.UIElements;
 
-namespace Plugins.DialogueSystem.Editor.DialogueGraph
+namespace Editor.DialogueSystem
 {
     public class InspectorView : VisualElement
     {

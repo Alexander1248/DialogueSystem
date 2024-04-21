@@ -13,12 +13,12 @@ using UnityEngine.UIElements;
 using Edge = UnityEditor.Experimental.GraphView.Edge;
 using IList = System.Collections.IList;
 
-namespace Plugins.DialogueSystem.Editor.DialogueGraph
+namespace Editor.DialogueSystem
 {
     public class DialogueGraphView : GraphView
     {
         public Action<NodeView> onNodeSelected;
-        private Scripts.DialogueGraph.DialogueGraph _graph;
+        private Plugins.DialogueSystem.Scripts.DialogueGraph.DialogueGraph _graph;
         
         private readonly List<AbstractNode> _sample = new();
         private Vector2 _copyPos; 
@@ -156,9 +156,8 @@ namespace Plugins.DialogueSystem.Editor.DialogueGraph
                         : clones[storyline.next[key]] as Storyline;
                 }
             }
-                
-            
-            UpdateView();
+
+            PopulateView(_graph);
         }
 
         private void Copy(Vector2 worldMousePosition)
@@ -190,8 +189,9 @@ namespace Plugins.DialogueSystem.Editor.DialogueGraph
             
         }
 
-        public void PopulateView(Scripts.DialogueGraph.DialogueGraph graph)
+        public void PopulateView(Plugins.DialogueSystem.Scripts.DialogueGraph.DialogueGraph graph)
         {
+            if (graph == null) throw new Exception("Graph not exists!");
             _graph = graph;
 
             graphViewChanged -= OnGraphViewChanged;

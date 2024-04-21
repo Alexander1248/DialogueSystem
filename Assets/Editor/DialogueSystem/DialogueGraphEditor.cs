@@ -3,7 +3,7 @@ using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace Plugins.DialogueSystem.Editor.DialogueGraph
+namespace Editor.DialogueSystem
 {
     public class DialogueGraphEditor : EditorWindow
     {

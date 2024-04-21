@@ -3,12 +3,12 @@
     <uie:Toolbar>
         <uie:ToolbarButton text="Save" parse-escape-sequences="true" display-tooltip-when-elided="true" name="save" />
     </uie:Toolbar>
-    <Plugins.DialogueSystem.Editor.DialogueGraph.SplitView fixed-pane-initial-dimension="300">
+    <Editor.DialogueSystem.SplitView fixed-pane-initial-dimension="300">
         <ui:VisualElement name="left" style="flex-grow: 1;">
-            <Plugins.DialogueSystem.Editor.DialogueGraph.InspectorView />
+            <Editor.DialogueSystem.InspectorView />
         </ui:VisualElement>
         <ui:VisualElement name="right" style="flex-grow: 1;">
-            <Plugins.DialogueSystem.Editor.DialogueGraph.DialogueGraphView focusable="true" style="flex-grow: 1;" />
+            <Editor.DialogueSystem.DialogueGraphView focusable="true" style="flex-grow: 1;" />
         </ui:VisualElement>
-    </Plugins.DialogueSystem.Editor.DialogueGraph.SplitView>
+    </Editor.DialogueSystem.SplitView>
 </ui:UXML>
