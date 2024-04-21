@@ -45,15 +45,15 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\2022.3.12f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\Editor\DialogueGraph\SplitView.cs" />
-     <Compile Include="Assets\Editor\DialogueGraph\DialogueGraphView.cs" />
-     <Compile Include="Assets\Editor\DialogueGraph\InspectorView.cs" />
-     <Compile Include="Assets\Editor\DialogueGraph\DialogueGraphEditor.cs" />
-     <Compile Include="Assets\Editor\DialogueGraph\NodeView.cs" />
-     <None Include="Assets\Editor\DialogueGraph\DialogueGraphEditor.uxml" />
+     <Compile Include="Assets\Editor\DialogueSystem\NodeView.cs" />
+     <Compile Include="Assets\Editor\DialogueSystem\DialogueGraphView.cs" />
+     <Compile Include="Assets\Editor\DialogueSystem\SplitView.cs" />
+     <Compile Include="Assets\Editor\DialogueSystem\InspectorView.cs" />
+     <Compile Include="Assets\Editor\DialogueSystem\DialogueGraphEditor.cs" />
+     <None Include="Assets\Editor\DialogueSystem\DialogueGraphEditor.uxml" />
      <Folder Include="Assets\Editor" />
-     <Folder Include="Assets\Editor\DialogueGraph" />
-     <None Include="Assets\Editor\DialogueGraph\DialogueGraphEditor.uss" />
+     <Folder Include="Assets\Editor\DialogueSystem" />
+     <None Include="Assets\Editor\DialogueSystem\DialogueGraphEditor.uss" />
      <Reference Include="UnityEngine">
      <HintPath>C:\Program Files\Unity\Hub\Editor\2022.3.12f1\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>
      </Reference>

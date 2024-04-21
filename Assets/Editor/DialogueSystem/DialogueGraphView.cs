@@ -36,7 +36,7 @@ namespace Plugins.DialogueSystem.Editor.DialogueGraph
 
             RegisterCallback<KeyDownEvent>(KeyDown);
             
-            var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/Editor/DialogueGraph/DialogueGraphEditor.uss");
+            var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/Editor/DialogueSystem/DialogueGraphEditor.uss");
             styleSheets.Add(styleSheet);
         }
 
