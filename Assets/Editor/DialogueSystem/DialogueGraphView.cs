@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Plugins.DialogueSystem.Scripts.DialogueGraph.Attributes;
 using Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes;
 using Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.StorylineNodes;
@@ -75,6 +76,7 @@ namespace Editor.DialogueSystem
             var types = TypeCache.GetTypesDerivedFrom<AbstractNode>();
             foreach (var type in types.Where(type => !type.IsAbstract))
             {
+                RuntimeHelpers.RunClassConstructor(type.TypeHandle);
                 var root = type;
                 while (root != null) {
                     if (root == typeof(Storyline))
