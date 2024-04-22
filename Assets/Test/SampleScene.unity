@@ -613,7 +613,7 @@ MonoBehaviour:
   onDialogueEnd:
     m_PersistentCalls:
       m_Calls: []
-  fastBoot: 0
+  fastBoot: 1
 --- !u!4 &2078735443
 Transform:
   m_ObjectHideFlags: 0
@@ -647,7 +647,7 @@ MonoBehaviour:
       - m_Target: {fileID: 2078735442}
         m_TargetAssemblyTypeName: Plugins.DialogueSystem.Scripts.DialogueGraph.Dialogue,
           Assembly-CSharp-firstpass
-        m_MethodName: StartDialogueNow
+        m_MethodName: StartDialogue
         m_Mode: 5
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

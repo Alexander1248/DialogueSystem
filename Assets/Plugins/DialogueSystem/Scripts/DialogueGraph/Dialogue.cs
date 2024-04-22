@@ -59,20 +59,24 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph
         public void StartDialogue(string rootName)
         {
             _fastSwap.Enqueue(rootName);
+            PlayDialogue();
         }
         public void QueueDialogue(string rootName)
         {
             _queue.Enqueue(rootName);
+            PlayDialogue();
         }
 
         public void PlayDialogue()
         {
+            if (IsPlaying) return;
             IsPlaying = true;
             if (!_current.drawer.IsUnityNull())
                 _current.drawer.PlayDraw(this);
         }
         public void PauseDialogue()
         {
+            if (!IsPlaying) return;
             IsPlaying = false;
             if (!_current.drawer.IsUnityNull())
                 _current.drawer.PauseDraw(this);
