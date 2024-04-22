@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Plugins.DialogueSystem.Scripts.DialogueGraph.Attributes;
@@ -17,17 +18,14 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph
 
         public static Storyline Clone(Storyline node)
         {
-            // TODO: Clone graph
             var clones = new Dictionary<AbstractNode, AbstractNode>();
-            var completed = new List<AbstractNode>();
             var queue = new Queue<AbstractNode>();
             
             queue.Enqueue(node);
             while (queue.Count > 0)
             {
                 var n = queue.Dequeue();
-                if (completed.Contains(n)) continue;
-                completed.Add(n);
+                if (clones.ContainsKey(n)) continue;
                 clones[n] = n.Clone();
                 foreach (var field in n.GetType().GetFields())
                 {
@@ -51,7 +49,7 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph
                     queue.Enqueue(dialogueNode.next[key]);
             }
             
-            completed.Clear();
+            var completed = new List<AbstractNode>();
             queue.Enqueue(node);
             while (queue.Count > 0)
             {
@@ -60,7 +58,7 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph
                 completed.Add(n);
 
                 var clone = clones[n];
-                if (clone == null) continue;
+                if (clone.IsUnityNull()) continue;
 
                 foreach (var field in n.GetType().GetFields())
                 {
@@ -69,16 +67,16 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph
                     if (field.FieldType.IsGenericType && field.FieldType.GetInterface(nameof(IList)) != null)
                     {
                         if (field.GetValue(n) is not IList values) continue;
-                        var list = new List<AbstractNode>();
+                        var list =  (IList) Activator.CreateInstance(field.FieldType);
                         foreach (var value in values)
                             if (value is AbstractNode abstractNode) 
-                                list.Add(abstractNode == null ? null : clones[abstractNode]);
+                                list.Add(abstractNode.IsUnityNull() ? null : clones[abstractNode]);
                         field.SetValue(clone, list);
                     }
                     else
                     {
                         var value = field.GetValue(n) as AbstractNode;
-                        field.SetValue(clone, value == null ? null : clones[value]);
+                        field.SetValue(clone, value.IsUnityNull() ? null : clones[value]);
                     }
                 }
 
@@ -86,9 +84,9 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph
                 var storylineClone = clone as Storyline;
                 foreach (var key in storyline.next.Keys)
                 {
-                    storylineClone!.next[key] = storyline.next[key] == null
+                    storylineClone!.next[key] = storyline.next[key].IsUnityNull()
                         ? null : clones[storyline.next[key]] as Storyline;
-                    if (storyline.next[key] == null) continue;
+                    if (storyline.next[key].IsUnityNull()) continue;
                     queue.Enqueue(storyline.next[key]);
                 }
             }

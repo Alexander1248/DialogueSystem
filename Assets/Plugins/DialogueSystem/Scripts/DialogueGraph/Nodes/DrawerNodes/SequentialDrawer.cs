@@ -54,7 +54,7 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.DrawerNodes
 
         public override void PlayDraw(Dialogue dialogue)
         {
-            _narrator?.Speak(_currentText[..(int) ((_currentText.Length + 1) * _time / time)]);
+            _narrator?.SpeakWithSound(_currentText[..(int) ((_currentText.Length + 1) * _time / time)]);
         }
 
         public override bool IsCompleted()

@@ -47,6 +47,7 @@
   <ItemGroup>
      <Compile Include="Assets\Plugins\DialogueSystem\Scripts\DialogueGraph\Nodes\PropertyNodes\ExecuteScript.cs" />
      <Compile Include="Assets\Plugins\DialogueSystem\Scripts\DialogueGraph\Nodes\BranchChoicers\ConditionChoicer.cs" />
+     <Compile Include="Assets\Plugins\DialogueSystem\Scripts\DialogueGraph\Nodes\PropertyNodes\SetCanSkip.cs" />
      <Compile Include="Assets\Plugins\DialogueSystem\Scripts\DialogueGraph\Nodes\PropertyNodes\PlayAnimation.cs" />
      <Compile Include="Assets\Plugins\DialogueSystem\Scripts\DialogueGraph\Nodes\TextContainers\SimpleContainer.cs" />
      <Compile Include="Assets\Plugins\DialogueSystem\Scripts\DialogueGraph\Nodes\TextContainers\LocalizedContainer.cs" />

@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
-using UnityEditorInternal;
 using UnityEngine;
 
 namespace Plugins.DialogueSystem.Scripts.Utils
@@ -40,7 +39,7 @@ namespace Plugins.DialogueSystem.Scripts.Utils
 
             public bool IsAligned => keys.arraySize == values.arraySize;
 
-            ReorderableList list;
+            UnityEditorInternal.ReorderableList list;
 
             GUIContent label;
 
@@ -69,7 +68,7 @@ namespace Plugins.DialogueSystem.Scripts.Utils
 
                 split = attribute as SplitAttribute;
 
-                list = new ReorderableList(property.serializedObject, keys, true, true, true, true);
+                list = new UnityEditorInternal.ReorderableList(property.serializedObject, keys, true, true, true, true);
 
                 list.drawHeaderCallback = DrawHeader;
 
@@ -172,7 +171,7 @@ namespace Plugins.DialogueSystem.Scripts.Utils
 
             void DrawCompleteHeader(ref Rect rect)
             {
-                ReorderableList.defaultBehaviours.DrawHeaderBackground(rect);
+                UnityEditorInternal.ReorderableList.defaultBehaviours.DrawHeaderBackground(rect);
 
                 rect.x += 6;
                 rect.y += 0;
@@ -254,23 +253,23 @@ namespace Plugins.DialogueSystem.Scripts.Utils
 
             #endregion
 
-            void Reorder(ReorderableList list, int oldIndex, int newIndex)
+            void Reorder(UnityEditorInternal.ReorderableList list, int oldIndex, int newIndex)
             {
                 values.MoveArrayElement(oldIndex, newIndex);
             }
 
-            void Add(ReorderableList list)
+            void Add(UnityEditorInternal.ReorderableList list)
             {
                 values.InsertArrayElementAtIndex(values.arraySize);
 
-                ReorderableList.defaultBehaviours.DoAddButton(list);
+                UnityEditorInternal.ReorderableList.defaultBehaviours.DoAddButton(list);
             }
 
-            void Remove(ReorderableList list)
+            void Remove(UnityEditorInternal.ReorderableList list)
             {
                 values.DeleteArrayElementAtIndex(list.index);
 
-                ReorderableList.defaultBehaviours.DoRemoveButton(list);
+                UnityEditorInternal.ReorderableList.defaultBehaviours.DoRemoveButton(list);
             }
 
             //Static Utility

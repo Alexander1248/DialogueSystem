@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using Plugins.DialogueSystem.Scripts.DialogueGraph.Attributes;
 using Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes;
 using Plugins.DialogueSystem.Scripts.Utils;
 using Unity.VisualScripting;
@@ -23,9 +25,15 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph
         public UnityEvent<string> onSentenceStart;
         public UnityEvent<string> onSentenceEnd;
         public UnityEvent onDialogueEnd;
+        
+        [SerializeField] private bool fastBoot;
 
         private Storyline _current;
         private bool _wait = true;
+        private readonly Queue<string> _fastSwap = new();
+        private readonly Queue<string> _queue = new();
+        private readonly Dictionary<AbstractNode, AbstractNode> _cloneBuffer = new();
+        private readonly Queue<AbstractNode> _cloningQueue = new Queue<AbstractNode>();
 
         public bool IsStarted => _current != null;
         public bool IsPlaying { get; private set; }
@@ -34,11 +42,27 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph
         public UDictionary<string, Object> Data => data;
         public readonly Dictionary<string, object> buffer = new();
 
-        public void StartDialogue(string rootName)
+        public void StartDialogueNow(string rootName)
         {
-            _current = DialogueGraph.Clone(graph.roots.Find(r => r.RootName == rootName));
+            Storyline root = graph.roots.Find(r => r.RootName == rootName);
+            if (root.IsUnityNull()) return;
+
+            if (fastBoot)
+            {
+                _current = root.Clone() as Storyline;
+                _cloneBuffer[root] = _current;
+            }
+            else _current = DialogueGraph.Clone(root);
             SwitchUpdate();
             PlayDialogue();
+        }
+        public void StartDialogue(string rootName)
+        {
+            _fastSwap.Enqueue(rootName);
+        }
+        public void QueueDialogue(string rootName)
+        {
+            _queue.Enqueue(rootName);
         }
 
         public void PlayDialogue()
@@ -58,7 +82,22 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph
         {
             _current = null;
         }
+        public void ClearFastSwap()
+        {
+            _fastSwap.Clear();
+        }
+        public void ClearQueue()
+        {
+            _queue.Clear();
+        }
 
+        public void StopAll()
+        {
+            ClearFastSwap();
+            ClearQueue();
+            StopDialogue();
+        }
+        
         public void ToNext()
         {
             _current.OnDelayStart(this);
@@ -70,13 +109,29 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph
             if (narrators.TryGetValue(narratorName, out var narrator)) return narrator;
             return narrators.Values.Count > 0 ? narrators.Values[0] : null;
         }
-        
+
         private void Update()
         {
-            if (_current.IsUnityNull() || !IsPlaying) return;
+            if (!IsPlaying) return;
+            if (_current.IsUnityNull())
+            {
+                if (_fastSwap.TryDequeue(out var fastRoot))
+                {
+                    StartDialogueNow(fastRoot);
+                    return;
+                }
+                if (_queue.TryDequeue(out var root))
+                {
+                    StartDialogueNow(root);
+                    return;
+                }
+                return;
+            }
             if (canSkip && Input.GetKeyDown(skipKey))
             {
                 CancelInvoke(nameof(GoToNext));
+                _current.OnDrawEnd(this);
+                _current.OnDelayStart(this);
                 GoToNext();
                 return;
             }
@@ -100,7 +155,61 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph
             onSentenceEnd.Invoke(_current.tag);
             if (!_current.drawer.IsUnityNull())
                 _current.drawer.PauseDraw(this);
+            if (_fastSwap.TryDequeue(out var root))
+            {
+                StartDialogueNow(root);
+                return;
+            }
             _current = _current.GetNext();
+            if (fastBoot)
+            {
+                if (_cloneBuffer.TryGetValue(_current, out var c)) _current = c as Storyline;
+                else
+                {
+                    _cloneBuffer[_current] = _current.Clone();
+                    _cloningQueue.Enqueue(_cloneBuffer[_current]);
+                    while (_cloningQueue.Count > 0)
+                    {
+                        var clone = _cloningQueue.Dequeue();
+
+                        foreach (var field in clone.GetType().GetFields())
+                        {
+                            if (!field.HasAttribute(typeof(InputPort))) continue;
+                            if (field.FieldType.IsGenericType && field.FieldType.GetInterface(nameof(IList)) != null)
+                            {
+                                if (field.GetValue(clone) is not IList values) continue;
+                                var list = (IList)Activator.CreateInstance(field.FieldType);
+                                foreach (var value in values)
+                                    if (value is AbstractNode abstractNode)
+                                    {
+                                        if (abstractNode.IsUnityNull())
+                                        {
+                                            list.Add(null);
+                                            return;
+                                        }
+                                        if (!_cloneBuffer.ContainsKey(abstractNode))
+                                            _cloneBuffer[abstractNode] = abstractNode.Clone();
+                                        _cloningQueue.Enqueue(_cloneBuffer[abstractNode]);
+                                        list.Add(_cloneBuffer[abstractNode]);
+                                    }
+
+                                field.SetValue(clone, list);
+                            }
+                            else if (field.GetValue(clone) is AbstractNode abstractNode)
+                            {
+                                if (abstractNode.IsUnityNull()) return;
+                                if (!_cloneBuffer.ContainsKey(abstractNode))
+                                    _cloneBuffer[abstractNode] = abstractNode.Clone();
+                                _cloningQueue.Enqueue(_cloneBuffer[abstractNode]);
+                                field.SetValue(clone, _cloneBuffer[abstractNode]);
+                            }
+                        }
+                    }
+
+                    _current = _cloneBuffer[_current] as Storyline;
+                }
+
+            }
             SwitchUpdate();
         }
         private void SwitchUpdate()
@@ -108,6 +217,19 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph
             if (_current.IsUnityNull())
             {
                 onDialogueEnd.Invoke();
+                
+                if (_fastSwap.TryDequeue(out var fastRoot))
+                {
+                    StartDialogueNow(fastRoot);
+                    return;
+                }
+                if (_queue.TryDequeue(out var root))
+                {
+                    StartDialogueNow(root);
+                    return;
+                }
+                
+                if (fastBoot) _cloneBuffer.Clear();
                 return;
             }
             _current.OnDrawStart(this);

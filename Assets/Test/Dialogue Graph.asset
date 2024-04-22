@@ -1,6 +1,51 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-2291122315208410840
+--- !u!114 &-9080132863454848680
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed4ea27954cd4d6689d3c0583d229408, type: 3}
+  m_Name: SimpleContainer
+  m_EditorClassIdentifier: 
+  guid: 029dca2a169fe0e41bddb36756a91f96
+  nodePos: {x: 513.2, y: -51.000004}
+  text: Text A
+--- !u!114 &-7428874253038738142
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed4ea27954cd4d6689d3c0583d229408, type: 3}
+  m_Name: SimpleContainer
+  m_EditorClassIdentifier: 
+  guid: 2f24e1dc01728d645b032ced270ce0ef
+  nodePos: {x: 0, y: 396}
+  text: A
+--- !u!114 &-6454697015312491595
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed4ea27954cd4d6689d3c0583d229408, type: 3}
+  m_Name: SimpleContainer
+  m_EditorClassIdentifier: 
+  guid: a7878d09296286d4eb9b8d8232fc5059
+  nodePos: {x: 0, y: 473}
+  text: B
+--- !u!114 &-4933390460422779843
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -12,13 +57,66 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc8867b2af034842b874de30232a275a, type: 3}
   m_Name: Storyline
   m_EditorClassIdentifier: 
-  guid: a7cb7476faedb0c41899906d016abc1f
-  nodePos: {x: 644, y: 536}
+  guid: 9c2e6fc7671468346a752b525aa27620
+  nodePos: {x: 457.19998, y: 103}
   next:
     keys: 00000000
     values:
-    - {fileID: 2229467342561859639}
-  drawer: {fileID: 0}
+    - {fileID: 8273228506840552722}
+  drawer: {fileID: 5543183303389765312}
+  branchChoicer: {fileID: 0}
+  properties: []
+  tag: 
+  delay: 1
+--- !u!114 &-3775521007974107038
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed4ea27954cd4d6689d3c0583d229408, type: 3}
+  m_Name: SimpleContainer
+  m_EditorClassIdentifier: 
+  guid: 3a8fa130fd94219498cb44a4e3b4d6cc
+  nodePos: {x: 513.2, y: 247}
+  text: Text B
+--- !u!114 &-1005302813405040337
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed4ea27954cd4d6689d3c0583d229408, type: 3}
+  m_Name: SimpleContainer
+  m_EditorClassIdentifier: 
+  guid: 3b4ad056b1606f44599cf1440377a709
+  nodePos: {x: 233, y: 93}
+  text: Variants
+--- !u!114 &-658937819060200431
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc8867b2af034842b874de30232a275a, type: 3}
+  m_Name: Storyline
+  m_EditorClassIdentifier: 
+  guid: 3b592587ae0fba54da0892c2201bd571
+  nodePos: {x: 457.19998, y: 401.00003}
+  next:
+    keys: 00000000
+    values:
+    - {fileID: 8273228506840552722}
+  drawer: {fileID: 1966640385658598323}
   branchChoicer: {fileID: 0}
   properties: []
   tag: 
@@ -39,9 +137,19 @@ MonoBehaviour:
   - {fileID: 5061586766915954239}
   nodes:
   - {fileID: 5061586766915954239}
-  - {fileID: -2291122315208410840}
-  - {fileID: 2229467342561859639}
---- !u!114 &2229467342561859639
+  - {fileID: 6598196750382342510}
+  - {fileID: -7428874253038738142}
+  - {fileID: -6454697015312491595}
+  - {fileID: -1005302813405040337}
+  - {fileID: 7730817891209534786}
+  - {fileID: 8273228506840552722}
+  - {fileID: -9080132863454848680}
+  - {fileID: 5543183303389765312}
+  - {fileID: -4933390460422779843}
+  - {fileID: -3775521007974107038}
+  - {fileID: 1966640385658598323}
+  - {fileID: -658937819060200431}
+--- !u!114 &1966640385658598323
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -50,20 +158,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc8867b2af034842b874de30232a275a, type: 3}
-  m_Name: Storyline
+  m_Script: {fileID: 11500000, guid: 64a1cbaed40a4bed949609d423f3e720, type: 3}
+  m_Name: SmartSequentialDrawer
   m_EditorClassIdentifier: 
-  guid: e7aab1946f6b24b4aa99cbdafb5a8316
-  nodePos: {x: 873, y: 536}
-  next:
-    keys: 00000000
-    values:
-    - {fileID: 0}
-  drawer: {fileID: 0}
-  branchChoicer: {fileID: 0}
-  properties: []
-  tag: 
-  delay: 1
+  guid: a4296157ca5240c48b086fb57c90d236
+  nodePos: {x: 473.20004, y: 324.00003}
+  container: {fileID: -3775521007974107038}
+  narrator: Narrator
+  symbolTime:
+    keys: 
+    values: []
+  defaultSymbolTime: 0.05
 --- !u!114 &5061586766915954239
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -77,14 +182,105 @@ MonoBehaviour:
   m_Name: DialogueRoot
   m_EditorClassIdentifier: 
   guid: 720e8185b5927e347a218b6c46af760e
-  nodePos: {x: 368, y: 536}
+  nodePos: {x: -19, y: 247}
   next:
     keys: 00000000
     values:
-    - {fileID: -2291122315208410840}
+    - {fileID: 8273228506840552722}
   drawer: {fileID: 0}
   branchChoicer: {fileID: 0}
   properties: []
   tag: 
   delay: 1
-  rootName: 
+  rootName: Root
+--- !u!114 &5543183303389765312
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64a1cbaed40a4bed949609d423f3e720, type: 3}
+  m_Name: SmartSequentialDrawer
+  m_EditorClassIdentifier: 
+  guid: d9f1d2f234d2da349b301d0c69158f54
+  nodePos: {x: 473.20004, y: 26.000004}
+  container: {fileID: -9080132863454848680}
+  narrator: Narrator
+  symbolTime:
+    keys: 
+    values: []
+  defaultSymbolTime: 0.05
+--- !u!114 &6598196750382342510
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93811e549c04478aa659e1d98ec6d1f6, type: 3}
+  m_Name: AnswerChoicer
+  m_EditorClassIdentifier: 
+  guid: f34e1c9771f04d84794a159751658573
+  nodePos: {x: 177, y: 396}
+  answerPrefab: {fileID: 5305987110253504635, guid: 3c5956b407fb0f04f96d3065c41586ef, type: 3}
+  answersRootKey: AnswerRoot
+  answers:
+  - {fileID: -7428874253038738142}
+  - {fileID: -6454697015312491595}
+  late: 1
+  pivot: 0
+  margin:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 0
+    height: 0
+--- !u!114 &7730817891209534786
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64a1cbaed40a4bed949609d423f3e720, type: 3}
+  m_Name: SmartSequentialDrawer
+  m_EditorClassIdentifier: 
+  guid: 7d028ac53cd879c45b40c61b3328ec0b
+  nodePos: {x: 193, y: 170}
+  container: {fileID: -1005302813405040337}
+  narrator: Narrator
+  symbolTime:
+    keys: 
+    values: []
+  defaultSymbolTime: 0.05
+--- !u!114 &8273228506840552722
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc8867b2af034842b874de30232a275a, type: 3}
+  m_Name: Storyline
+  m_EditorClassIdentifier: 
+  guid: 63e0a72c8bacf3742b9131a8a92bc7f5
+  nodePos: {x: 177, y: 247}
+  next:
+    keys: 0000000001000000
+    values:
+    - {fileID: -4933390460422779843}
+    - {fileID: -658937819060200431}
+  drawer: {fileID: 7730817891209534786}
+  branchChoicer: {fileID: 6598196750382342510}
+  properties: []
+  tag: 
+  delay: 1

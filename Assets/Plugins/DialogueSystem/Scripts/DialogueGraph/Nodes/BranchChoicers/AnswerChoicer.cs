@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Plugins.DialogueSystem.Scripts.DialogueGraph.Attributes;
 using Plugins.DialogueSystem.Scripts.UI;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -12,7 +13,9 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.BranchChoicers
         [SerializeField] private GameObject answerPrefab;
         [SerializeField] private string answersRootKey;
 
-        [SerializeField] private string[] answers;
+        [InputPort("Answers")]
+        [HideInInspector]
+        public List<TextContainer> answers;
 
         [SerializeField] private bool late;
         
@@ -22,9 +25,11 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.BranchChoicers
         private UnityAction<Dialogue> _listener;
         private List<Answer> _answers;
         private bool _isManual;
+        private CursorLockMode _modeBuff;
+        private bool _visibilityBuff;
         public override void OnDrawStart(Dialogue dialogue, Storyline node)
         {
-            if (!answerPrefab.TryGetComponent(typeof(RectTransform), out var _))
+            if (!answerPrefab.TryGetComponent(typeof(RectTransform), out _))
                 throw new ArgumentException("Answer prefab not UI component!");
             if (!answerPrefab.TryGetComponent(typeof(Answer), out _))
                 throw new ArgumentException("Answer prefab not contain Answer Behaviour!");
@@ -48,7 +53,7 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.BranchChoicers
             _listener = Click;
             _isManual = dialogue.manual;
             dialogue.manual = true;
-            while (_answers.Count < answers.Length)
+            while (_answers.Count < answers.Count)
             {
                 var answerGameObject = Instantiate(answerPrefab);
                 var transform = answerGameObject.GetComponent<RectTransform>();
@@ -66,26 +71,38 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.BranchChoicers
             }
 
             if (late) return;
-            for (var i = 0; i < answers.Length; i++)
+            _modeBuff = Cursor.lockState;
+            _visibilityBuff = Cursor.visible;
+            Cursor.lockState = CursorLockMode.Confined;
+            Cursor.visible = true;
+            
+            for (var i = 0; i < answers.Count; i++)
             {
                 _answers[i].gameObject.SetActive(true);
-                _answers[i].Show(answers[i], () => _listener.Invoke(dialogue));
+                _answers[i].Show(answers[i].GetText(), () => _listener.Invoke(dialogue));
             }
         }
 
         public override void OnDrawEnd(Dialogue dialogue, Storyline storyline)
         {
             if (!late) return;
-            for (var i = 0; i < answers.Length; i++)
+            _modeBuff = Cursor.lockState;
+            _visibilityBuff = Cursor.visible;
+            Cursor.lockState = CursorLockMode.Confined;
+            Cursor.visible = true;
+            
+            for (var i = 0; i < answers.Count; i++)
             {
                 _answers[i].gameObject.SetActive(true);
-                _answers[i].Show(answers[i], () => _listener.Invoke(dialogue));
+                _answers[i].Show(answers[i].GetText(), () => _listener.Invoke(dialogue));
             }
         }
 
         public override void OnDelayStart(Dialogue dialogue, Storyline storyline)
         {
-            for (var i = 0; i < answers.Length; i++)
+            Cursor.lockState = _modeBuff;
+            Cursor.visible = _visibilityBuff;
+            for (var i = 0; i < answers.Count; i++)
             {
                 _answers[i].Hide();
                 _answers[i].gameObject.SetActive(false);
@@ -100,7 +117,7 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.BranchChoicers
         private void Click(Dialogue dialogue)
         {
             SelectionIndex = -1;
-            for (var i = 0; i < answers.Length; i++)
+            for (var i = 0; i < answers.Count; i++)
                 if (_answers[i].IsSelected)
                 {
                     SelectionIndex = i;
@@ -116,7 +133,6 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.BranchChoicers
             var node = Instantiate(this);
             node.answerPrefab = answerPrefab;
             node.answersRootKey = answersRootKey;
-            node.answers = answers;
             node.late = late;
             node.pivot = pivot;
             node.margin = margin;

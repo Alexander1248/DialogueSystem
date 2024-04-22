@@ -18,7 +18,9 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.DrawerNodes
         {
             var node = Instantiate(this);
             node.narrator = narrator;
-            node.symbolTime = symbolTime;
+            node.symbolTime = new UDictionary<char, float>();
+            foreach (var pair in symbolTime) 
+                node.symbolTime.Add(pair.Key, pair.Value);
             node.defaultSymbolTime = defaultSymbolTime;
             return node;
         }
@@ -80,7 +82,7 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.DrawerNodes
         public override void PlayDraw(Dialogue dialogue)
         {
             if (!IsCompleted())
-                _narrator?.Speak(_currentText[..(_index + 1)]);
+                _narrator?.SpeakWithSound(_currentText[..(_index + 1)]);
         }
 
         public override bool IsCompleted()

@@ -76,9 +76,9 @@ namespace Editor.DialogueSystem
             var types = TypeCache.GetTypesDerivedFrom<AbstractNode>();
             foreach (var type in types.Where(type => !type.IsAbstract))
             {
-                RuntimeHelpers.RunClassConstructor(type.TypeHandle);
                 var root = type;
                 while (root != null) {
+                    RuntimeHelpers.RunClassConstructor(root.TypeHandle);
                     if (root == typeof(Storyline))
                     {
                         evt.menu.AppendAction($"Storylines/{type.Name}", 
@@ -148,15 +148,12 @@ namespace Editor.DialogueSystem
                         field.SetValue(clone, value == null ? null : clones.GetValueOrDefault(value, value));
                     }
                 }
-                    
+                
                 if (node is not Storyline storyline) continue;
                 var storylineClone = clone as Storyline;
                 foreach (var key in storyline.next.Keys)
-                {
-                    storylineClone!.next[key] = storyline.next[key] == null
-                        ? null
-                        : clones[storyline.next[key]] as Storyline;
-                }
+                    storylineClone!.next[key] = storyline.next[key] == null ? null : 
+                        clones.GetValueOrDefault(storyline.next[key], storyline.next[key]) as Storyline;
             }
 
             PopulateView(_graph);
