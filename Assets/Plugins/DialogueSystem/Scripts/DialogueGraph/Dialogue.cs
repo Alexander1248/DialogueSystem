@@ -26,7 +26,7 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph
         public UnityEvent<string> onSentenceEnd;
         public UnityEvent onDialogueEnd;
         
-        [SerializeField] private bool fastBoot;
+        [SerializeField] private bool lazy;
 
         private Storyline _current;
         private bool _wait = true;
@@ -47,7 +47,7 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph
             Storyline root = graph.roots.Find(r => r.RootName == rootName);
             if (root.IsUnityNull()) return;
 
-            if (fastBoot)
+            if (lazy)
             {
                 _current = root.Clone() as Storyline;
                 _cloneBuffer[root] = _current;
@@ -165,7 +165,7 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph
                 return;
             }
             _current = _current.GetNext();
-            if (fastBoot)
+            if (lazy)
             {
                 if (_cloneBuffer.TryGetValue(_current, out var c)) _current = c as Storyline;
                 else
@@ -233,7 +233,7 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph
                     return;
                 }
                 
-                if (fastBoot) _cloneBuffer.Clear();
+                if (lazy) _cloneBuffer.Clear();
                 return;
             }
             _current.OnDrawStart(this);
