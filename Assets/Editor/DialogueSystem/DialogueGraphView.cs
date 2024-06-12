@@ -76,47 +76,16 @@ namespace Editor.DialogueSystem
             var types = TypeCache.GetTypesDerivedFrom<AbstractNode>();
             foreach (var type in types.Where(type => !type.IsAbstract))
             {
-                var root = type;
-                while (root != null) {
-                    RuntimeHelpers.RunClassConstructor(root.TypeHandle);
-                    if (root == typeof(Storyline))
-                    {
-                        evt.menu.AppendAction($"Storylines/{type.Name}", 
-                            _ => CreateNode(type, worldMousePosition));
-                        break;
-                    }
-                    if (root == typeof(Drawer))
-                    {
-                        evt.menu.AppendAction($"Drawers/{type.Name}", 
-                            _ => CreateNode(type, worldMousePosition));
-                        break;
-                    }
-                    if (root == typeof(TextContainer))
-                    {
-                        evt.menu.AppendAction($"TextContainers/{type.Name}", 
-                            _ => CreateNode(type, worldMousePosition));
-                        break;
-                    }
-                    if (root == typeof(BranchChoicer))
-                    {
-                        evt.menu.AppendAction($"BranchChoicers/{type.Name}", 
-                            _ => CreateNode(type, worldMousePosition));
-                        break;
-                    }
-                    if (root == typeof(Property))
-                    {
-                        evt.menu.AppendAction($"Properties/{type.Name}", 
-                            _ => CreateNode(type, worldMousePosition));
-                        break;
-                    }
-                    if (root == typeof(Value))
-                    {
-                        evt.menu.AppendAction($"Values/{type.Name}", 
-                            _ => CreateNode(type, worldMousePosition));
-                        break;
-                    }
-                    root = root.BaseType;
+                var path = "";
+                var attribute = type.GetAttribute<EditorPath>();
+                if (attribute != null && attribute.path.Length > 0)
+                {
+                    path = attribute.path.Replace("\\", "/");
+                    if (!path.EndsWith("/")) path += "/";
                 }
+                
+                evt.menu.AppendAction($"{path}{type.Name}", 
+                    _ => CreateNode(type, worldMousePosition));
             }
         }
 

@@ -1,7 +1,9 @@
-﻿using UnityEngine;
+﻿using Plugins.DialogueSystem.Scripts.DialogueGraph.Attributes;
+using UnityEngine;
 
 namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.PropertyNodes
 {
+    [EditorPath("Property")]
     public class CanSkip : Property
     {
         [SerializeField] private Stage stage;

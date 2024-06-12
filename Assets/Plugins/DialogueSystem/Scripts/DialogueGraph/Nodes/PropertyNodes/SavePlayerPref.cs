@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.PropertyNodes
 {
+    [EditorPath("Property")]
     public class SavePlayerPref : Property
     {
         [SerializeField] private Stage stage;

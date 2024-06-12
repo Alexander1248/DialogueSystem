@@ -1,8 +1,10 @@
-﻿using UnityEngine;
+﻿using Plugins.DialogueSystem.Scripts.DialogueGraph.Attributes;
+using UnityEngine;
 
 namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.TextContainers
 {
-    public class SimpleContainer : TextContainer
+    [EditorPath("TextContainers")]
+    public class SimpleTextContainer : TextContainer
     {
         [SerializeField] private string text;
         public override string GetText()
@@ -12,7 +14,7 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.TextContainers
 
         public override AbstractNode Clone()
         {
-            var clone = base.Clone() as SimpleContainer;
+            var clone = base.Clone() as SimpleTextContainer;
             clone.text = text;
             return clone;
         }

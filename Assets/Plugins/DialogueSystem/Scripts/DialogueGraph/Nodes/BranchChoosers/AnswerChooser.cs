@@ -6,9 +6,10 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.BranchChoicers
+namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.BranchChoosers
 {
-    public class AnswerChoicer : BranchChoicer
+    [EditorPath("BranchChoosers")]
+    public class AnswerChooser : BranchChooser
     {
         [SerializeField] private GameObject answerPrefab;
         [SerializeField] private string answersRootKey;

@@ -3,7 +3,8 @@ using UnityEngine;
 
 namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.TextContainers
 {
-    public class ValueContainer : TextContainer
+    [EditorPath("TextContainers")]
+    public class ValueTextContainer : TextContainer
     {
         [InputPort]
         [HideInInspector]

@@ -3,12 +3,12 @@ using UnityEngine;
 
 namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes
 {
-    [OutputPort(typeof(BranchChoicer), "BranchChoicer")]
-    public abstract class BranchChoicer : AbstractNode
+    [OutputPort(typeof(BranchChooser), "BranchChoicer")]
+    public abstract class BranchChooser : AbstractNode
     {
-        static BranchChoicer()
+        static BranchChooser()
         {
-            NodeColors.Colors.Add(typeof(BranchChoicer), new Color(0.3f, 0.5f, 1f));
+            NodeColors.Colors.Add(typeof(BranchChooser), new Color(0.3f, 0.5f, 1f));
         }
         public int SelectionIndex { get; protected set; }
         public abstract void OnDrawStart(Dialogue dialogue, Storyline node);

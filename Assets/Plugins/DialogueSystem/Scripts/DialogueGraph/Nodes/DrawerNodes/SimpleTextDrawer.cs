@@ -1,29 +1,24 @@
-﻿using UnityEngine;
+﻿using Plugins.DialogueSystem.Scripts.DialogueGraph.Attributes;
+using UnityEngine;
 
 namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.DrawerNodes
 {
-    public class SequentialDrawer : Drawer
+    [EditorPath("Drawers")]
+    public class SimpleTextDrawer : TextPlayer
     {
         [SerializeField] private string narrator;
-        [SerializeField] private float time = 1;
 
         private Narrator _narrator;
-        private string _currentText;
-        private float _time;
-
         public override AbstractNode Clone()
         {
             var node = Instantiate(this);
             node.narrator = narrator;
-            node.time = time;
             return node;
         }
-
+        
         public override void OnDrawStart(Dialogue dialogue, Storyline storyline)
         {
             _narrator = dialogue.GetNarrator(narrator);
-            _currentText = container.GetText();
-            _time = 0;
         }
 
         public override void OnDrawEnd(Dialogue dialogue, Storyline storyline)
@@ -43,8 +38,7 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.DrawerNodes
 
         public override void Draw(Dialogue dialogue)
         {
-            PlayDraw(dialogue);
-            _time += Time.deltaTime;
+            _narrator?.Speak(textContainer.GetText());
         }
 
         public override void PauseDraw(Dialogue dialogue)
@@ -54,12 +48,12 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.DrawerNodes
 
         public override void PlayDraw(Dialogue dialogue)
         {
-            _narrator?.SpeakWithSound(_currentText[..(int) ((_currentText.Length + 1) * _time / time)]);
+            Draw(dialogue);
         }
 
         public override bool IsCompleted()
         {
-            return _time > time;
+            return true;
         }
     }
 }

@@ -2,10 +2,10 @@
 using Plugins.DialogueSystem.Scripts.DialogueGraph.Attributes;
 using Plugins.DialogueSystem.Scripts.Value;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.ValueNodes
 {
+    [EditorPath("Math")]
     [OutputPort(typeof(Value), "Result")]
     public class UnaryOperation : Value
     {

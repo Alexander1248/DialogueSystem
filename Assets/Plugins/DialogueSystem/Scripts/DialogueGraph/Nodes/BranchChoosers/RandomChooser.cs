@@ -1,8 +1,10 @@
-﻿using UnityEngine;
+﻿using Plugins.DialogueSystem.Scripts.DialogueGraph.Attributes;
+using UnityEngine;
 
-namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.BranchChoicers
+namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.BranchChoosers
 {
-    public class RandomChoicer : BranchChoicer
+    [EditorPath("BranchChoosers")]
+    public class RandomChooser : BranchChooser
     {
 
         public override void OnDrawStart(Dialogue dialogue, Storyline node)

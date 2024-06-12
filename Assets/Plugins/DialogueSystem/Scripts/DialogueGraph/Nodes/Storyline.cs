@@ -9,6 +9,7 @@ using UnityEngine.UIElements;
 
 namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes
 {
+    [EditorPath("Storylines")]
     [OutputPort(typeof(Storyline),"Storyline")]
     public class Storyline : AbstractNode
     {
@@ -18,13 +19,15 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes
         }
         [HideInInspector] public UDictionary<int, Storyline> next = new();
         
-        [InputPort("Drawer")]
+        [FormerlySerializedAs("drawer")]
+        [InputPort("TextPlayer")]
         [HideInInspector] 
-        public Drawer drawer;
+        public TextPlayer textPlayer;
         
+        [FormerlySerializedAs("branchChoicer")]
         [InputPort("BranchChoicer")]
         [HideInInspector]
-        public BranchChoicer branchChoicer;
+        public BranchChooser branchChooser;
         
         [InputPort("Properties")]
         [HideInInspector] 
@@ -40,13 +43,13 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes
 
         public virtual Storyline GetNext() 
         {
-            if (branchChoicer.IsUnityNull()) return next[0];
-            if (branchChoicer.SelectionIndex < 0 || branchChoicer.SelectionIndex >= next.Count)
+            if (branchChooser.IsUnityNull()) return next[0];
+            if (branchChooser.SelectionIndex < 0 || branchChooser.SelectionIndex >= next.Count)
             {
                 Debug.LogError("BranchChoisers selection index out of bounds!");
                 return null;
             }
-            return next[branchChoicer.SelectionIndex];
+            return next[branchChooser.SelectionIndex];
         }
 
 
@@ -54,44 +57,44 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes
         {
             properties.ForEach(property => property.OnDrawStart(dialogue, this));
             
-            if (!drawer.IsUnityNull())
-                drawer.OnDrawStart(dialogue, this);
+            if (!textPlayer.IsUnityNull())
+                textPlayer.OnDrawStart(dialogue, this);
             
-            if (!branchChoicer.IsUnityNull())
-                branchChoicer.OnDrawStart(dialogue, this);
+            if (!branchChooser.IsUnityNull())
+                branchChooser.OnDrawStart(dialogue, this);
         }
 
         public virtual void OnDrawEnd(Dialogue dialogue)
         {
             properties.ForEach(property => property.OnDrawEnd(dialogue, this));
             
-            if (!drawer.IsUnityNull())
-                drawer.OnDrawEnd(dialogue, this);
+            if (!textPlayer.IsUnityNull())
+                textPlayer.OnDrawEnd(dialogue, this);
             
-            if (!branchChoicer.IsUnityNull())
-                branchChoicer.OnDrawEnd(dialogue, this);
+            if (!branchChooser.IsUnityNull())
+                branchChooser.OnDrawEnd(dialogue, this);
         } 
         public virtual void OnDelayStart(Dialogue dialogue)
         {
             
             properties.ForEach(property => property.OnDelayStart(dialogue, this));
             
-            if (!drawer.IsUnityNull())
-                drawer.OnDelayStart(dialogue, this);
+            if (!textPlayer.IsUnityNull())
+                textPlayer.OnDelayStart(dialogue, this);
             
-            if (!branchChoicer.IsUnityNull())
-                branchChoicer.OnDelayStart(dialogue, this);
+            if (!branchChooser.IsUnityNull())
+                branchChooser.OnDelayStart(dialogue, this);
         } 
         public virtual void OnDelayEnd(Dialogue dialogue)
         {
             
             properties.ForEach(property => property.OnDelayEnd(dialogue, this));
             
-            if (!drawer.IsUnityNull())
-                drawer.OnDelayEnd(dialogue, this);
+            if (!textPlayer.IsUnityNull())
+                textPlayer.OnDelayEnd(dialogue, this);
             
-            if (!branchChoicer.IsUnityNull())
-                branchChoicer.OnDelayEnd(dialogue, this);
+            if (!branchChooser.IsUnityNull())
+                branchChooser.OnDelayEnd(dialogue, this);
         } 
         public override void BuildContextualMenu(ContextualMenuPopulateEvent evt, Action onGraphViewUpdate)
         {

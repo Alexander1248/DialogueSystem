@@ -1,14 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using Plugins.DialogueSystem.Scripts.DialogueGraph.Attributes;
+using Plugins.DialogueSystem.Scripts.Value;
 using UnityEngine;
 
-namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.BranchChoicers
+namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.BranchChoosers
 {
-    public class ConditionChoicer : BranchChoicer
+    [EditorPath("BranchChoosers")]
+    public class ValueChooser : BranchChooser
     {
-        [InputPort("Conditions")]
+        [InputPort("Value")]
         [HideInInspector]
-        public List<Value> conditions = new();
+        public Value value;
         
         public override void OnDrawStart(Dialogue dialogue, Storyline node)
         {
@@ -16,12 +18,9 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.BranchChoicers
 
         public override void OnDrawEnd(Dialogue dialogue, Storyline storyline)
         {
-            for (var i = 0; i < conditions.Count; i++)
-                if (conditions[i].GetValue().Get() is true)
-                {
-                    SelectionIndex = i;
-                    break;
-                }
+            if (value.GetValue() is not Integer integer)
+                throw new ArgumentException("Not integer value!");
+            SelectionIndex = (int) integer.Get();
         }
 
         public override void OnDelayStart(Dialogue dialogue, Storyline storyline)

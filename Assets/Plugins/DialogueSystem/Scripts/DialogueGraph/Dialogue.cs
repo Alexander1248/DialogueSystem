@@ -26,14 +26,14 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph
         public UnityEvent<string> onSentenceEnd;
         public UnityEvent onDialogueEnd;
         
-        [SerializeField] private bool lazy;
+        [SerializeField] private bool lazy = true;
 
         private Storyline _current;
         private bool _wait = true;
         private readonly Queue<string> _fastSwap = new();
         private readonly Queue<string> _queue = new();
         private readonly Dictionary<AbstractNode, AbstractNode> _cloneBuffer = new();
-        private readonly Queue<AbstractNode> _cloningQueue = new Queue<AbstractNode>();
+        private readonly Queue<AbstractNode> _cloningQueue = new();
 
         public bool IsStarted => _current != null;
         public bool IsPlaying { get; private set; }
@@ -71,15 +71,15 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph
         {
             if (IsPlaying) return;
             IsPlaying = true;
-            if (!_current.drawer.IsUnityNull())
-                _current.drawer.PlayDraw(this);
+            if (!_current.textPlayer.IsUnityNull())
+                _current.textPlayer.PlayDraw(this);
         }
         public void PauseDialogue()
         {
             if (!IsPlaying) return;
             IsPlaying = false;
-            if (!_current.drawer.IsUnityNull())
-                _current.drawer.PauseDraw(this);
+            if (!_current.textPlayer.IsUnityNull())
+                _current.textPlayer.PauseDraw(this);
         }
 
         public void StopDialogue()
@@ -141,11 +141,11 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph
             }
 
             if (_wait) return;
-            if (!_current.drawer.IsUnityNull())
-                _current.drawer.Draw(this);
+            if (!_current.textPlayer.IsUnityNull())
+                _current.textPlayer.Draw(this);
             
-            if (_current.drawer.IsUnityNull() 
-                || _current.drawer.IsCompleted())
+            if (_current.textPlayer.IsUnityNull() 
+                || _current.textPlayer.IsCompleted())
             {
                 _current.OnDrawEnd(this);
                 if (!manual) ToNext();
@@ -157,8 +157,8 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph
         {
             _current.OnDelayEnd(this);
             onSentenceEnd.Invoke(_current.tag);
-            if (!_current.drawer.IsUnityNull())
-                _current.drawer.PauseDraw(this);
+            if (!_current.textPlayer.IsUnityNull())
+                _current.textPlayer.PauseDraw(this);
             if (_fastSwap.TryDequeue(out var root))
             {
                 StartDialogueNow(root);

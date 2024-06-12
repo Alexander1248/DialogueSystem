@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.ValueNodes
 {
+    [EditorPath("Math")]
     [OutputPort(typeof(Value), "Result")]
     public class BinaryOperation : Value
     {

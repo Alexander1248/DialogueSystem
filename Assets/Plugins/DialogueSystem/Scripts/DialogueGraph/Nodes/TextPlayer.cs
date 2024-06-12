@@ -1,18 +1,20 @@
 ﻿using Plugins.DialogueSystem.Scripts.DialogueGraph.Attributes;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes
 {
-    [OutputPort(typeof(Drawer),"Drawer")]
-    public abstract class Drawer : AbstractNode
+    [OutputPort(typeof(TextPlayer),"TextPlayer")]
+    public abstract class TextPlayer : AbstractNode
     {
-        static Drawer()
+        static TextPlayer()
         {
-            NodeColors.Colors.Add(typeof(Drawer), new Color(0.8f, 0.4f, 0));
+            NodeColors.Colors.Add(typeof(TextPlayer), new Color(0.8f, 0.4f, 0));
         }
+        [FormerlySerializedAs("container")]
         [InputPort("Text")]
         [HideInInspector]
-        public TextContainer container;
+        public TextContainer textContainer;
         public abstract void OnDrawStart(Dialogue dialogue, Storyline storyline);
         public abstract void OnDrawEnd(Dialogue dialogue, Storyline storyline);
         public abstract void OnDelayStart(Dialogue dialogue, Storyline storyline);

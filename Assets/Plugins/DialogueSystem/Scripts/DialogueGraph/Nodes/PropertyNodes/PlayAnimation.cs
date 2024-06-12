@@ -5,6 +5,7 @@ using UnityEngine.Serialization;
 
 namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.PropertyNodes
 {
+    [EditorPath("Property")]
     public class PlayAnimation : Property
     {
         [SerializeField] private string animationObjectKey;

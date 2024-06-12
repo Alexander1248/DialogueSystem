@@ -1,9 +1,11 @@
-﻿using Plugins.DialogueSystem.Scripts.Utils;
+﻿using Plugins.DialogueSystem.Scripts.DialogueGraph.Attributes;
+using Plugins.DialogueSystem.Scripts.Utils;
 using UnityEngine;
 
 namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.TextContainers
 {
-    public class LocalizedContainer : TextContainer
+    [EditorPath("TextContainers")]
+    public class LocalizedTextContainer : TextContainer
     {
         [SerializeField] private string localePlayerPref;
         [SerializeField] private string defaultLocale;
@@ -17,7 +19,7 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.TextContainers
 
         public override AbstractNode Clone()
         {
-            var clone = base.Clone() as LocalizedContainer;
+            var clone = base.Clone() as LocalizedTextContainer;
             clone.localePlayerPref = localePlayerPref;
             clone.defaultLocale = defaultLocale;
             foreach (var pair in localizations) 

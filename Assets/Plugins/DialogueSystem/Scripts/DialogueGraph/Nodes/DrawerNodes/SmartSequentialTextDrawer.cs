@@ -1,9 +1,11 @@
-﻿using Plugins.DialogueSystem.Scripts.Utils;
+﻿using Plugins.DialogueSystem.Scripts.DialogueGraph.Attributes;
+using Plugins.DialogueSystem.Scripts.Utils;
 using UnityEngine;
 
 namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.DrawerNodes
 {
-    public class SmartSequentialDrawer : Drawer
+    [EditorPath("Drawers")]
+    public class SmartSequentialTextDrawer : TextPlayer
     {
         [SerializeField] private string narrator;
         [SerializeField] private UDictionary<char, float> symbolTime;
@@ -28,7 +30,7 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Nodes.DrawerNodes
         public override void OnDrawStart(Dialogue dialogue, Storyline storyline)
         {
             _narrator = dialogue.GetNarrator(narrator);
-            _currentText = container.GetText();
+            _currentText = textContainer.GetText();
             _time = 0;
             _index = 0;
             ComputeLimit();
