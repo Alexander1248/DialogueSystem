@@ -165,7 +165,7 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph
                 return;
             }
             _current = _current.GetNext();
-            if (lazy)
+            if (lazy && _current != null)
             {
                 if (_cloneBuffer.TryGetValue(_current, out var c)) _current = c as Storyline;
                 else

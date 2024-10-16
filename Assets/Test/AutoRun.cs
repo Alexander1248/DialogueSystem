@@ -1,17 +1,18 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class AutoRun : MonoBehaviour
+namespace Test
 {
-    [SerializeField] private UnityEvent autorun;
-    [SerializeField] private bool destroyObjectAfter;
-
-    private void Start()
+    public class AutoRun : MonoBehaviour
     {
-        autorun.Invoke();
-        if (destroyObjectAfter) Destroy(gameObject);
-        else Destroy(this);
+        [SerializeField] private UnityEvent autorun;
+        [SerializeField] private bool destroyObjectAfter;
+
+        private void Start()
+        {
+            autorun.Invoke();
+            if (destroyObjectAfter) Destroy(gameObject);
+            else Destroy(this);
+        }
     }
 }

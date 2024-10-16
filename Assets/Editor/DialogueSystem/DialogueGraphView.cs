@@ -78,9 +78,9 @@ namespace Editor.DialogueSystem
             {
                 var path = "";
                 var attribute = type.GetAttribute<EditorPath>();
-                if (attribute != null && attribute.path.Length > 0)
+                if (attribute != null && attribute.path.Replace("/", "").Length > 0)
                 {
-                    path = attribute.path.Replace("\\", "/");
+                    path = attribute.path;
                     if (!path.EndsWith("/")) path += "/";
                 }
                 

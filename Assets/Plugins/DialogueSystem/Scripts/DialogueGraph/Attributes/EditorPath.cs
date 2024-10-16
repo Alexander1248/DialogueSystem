@@ -9,7 +9,7 @@ namespace Plugins.DialogueSystem.Scripts.DialogueGraph.Attributes
 
         public EditorPath(string path)
         {
-            this.path = path;
+            this.path = path.Replace("\\", "/");
         }
     }
 }
